@@ -1,0 +1,37 @@
+# ---------------------------------------------------------------
+# This is a configuration file for BioMoby services.
+# Copy it into file 'moby-services.cfg' and edit it to your needs.
+# (Or run ../scripts/install.pl to do it.)
+#
+# Your new copy has to be in a directory define by an environment
+# variable BIOMOBY_CFG_DIR, or in any directory defined in the
+# Perl's @INC array. Keeping it in this directory is usually fine
+# because the MOBY code must be found by Perl anyway.
+#
+# $Id: moby-services.cfg.template,v 1.7 2006/07/31 15:23:34 senger Exp $
+# Contact: Martin Senger <martin.senger@gmail.com>
+# ---------------------------------------------------------------
+
+cachedir = @CACHE_DIR@
+registry = @REGISTRY@
+
+[generators]
+outdir = @GENERATED_DIR@
+impl.outdir = @SERVICES_DIR@
+impl.package.prefix = Service
+impl.services.table = @SERVICES_TABLE@
+#ignore.existing.types = true
+
+[log]
+config = @LOG4PERL_FILE@
+#file = @LOGFILE@
+#level = info
+#pattern = "%d (%r) %p> [%x] %F{1}:%L - %m%n"
+
+[xml]
+#parser = XML::LibXML::SAX
+#parser = XML::LibXML::SAX::Parser
+#parser = XML::SAX::PurePerl
+
+[Mabuhay]
+resource.file = @MABUHAY_RESOURCE@
