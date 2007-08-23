@@ -3,7 +3,7 @@
     
     # Define metadata
     name            'MOSES-MOBY';
-	version 		'0.80';
+	version 		'0.81';
 	license 		'perl';
   	abstract 		'This distribution aids in the creation of BioMOBY perl based web services.';
     all_from        'lib/MOSES/MOBY.pm';

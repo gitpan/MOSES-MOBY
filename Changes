@@ -1,5 +1,9 @@
 Revision history for Perl extension MOSES::MOBY.
 
+.81  Wed Aug 22 10:21:26 2007
+	- found errors in the MOSES/MOBY.pm
+	  pod doc and fixed them
+	  
 .80  Mon Jul 30 10:21:26 2007
 	- original version
 

@@ -7,7 +7,7 @@ use warnings;
 
 use vars qw{$VERSION @ISA @EXPORT @EXPORT_OK};
 BEGIN {
-	$VERSION = '0.8';
+	$VERSION = '0.81';
 	@ISA       = qw{ Exporter };
 	@EXPORT    = qw{};
 	@EXPORT_OK = qw{};
@@ -31,13 +31,13 @@ MOSES::MOBY - Perl extension for the automatic generation of BioMOBY web service
 
   # to get started, run the install script
   moses-install.pl
-  
+ 
   # generate a service implementation, for example HelloBiomobyWorld from samples.jmoby.net
   moses-generate-services.pl samples.jmoby.net HelloBiomobyWorld
-  
+ 
   # assuming that you have deployed it, test it!
   moses-testing-service.pl -e http://localhost/cgi-bin/MobyServer.cgi HelloBiomobyWorld
-  
+ 
   # read the POD for more details!
 
 =head1 DESCRIPTION
@@ -84,7 +84,7 @@ Assuming that you have already installed this package, the very first thing that
 
 This script will do the following:
 
-= over 4
+=over 4
 
 =item * Check for prerequisite modules
 
@@ -94,7 +94,7 @@ This script will do the following:
 
 =item * Create the logging and service configuration files
 
-= back
+=back
 
 Once the installation process is complete, you can create your first service!
 
