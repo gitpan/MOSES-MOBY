@@ -155,12 +155,18 @@ sub process_it {
     my ($self, $request, $response, $context) = @_;
 
     # read input data (eval to protect against missing data)
-    [%- FOREACH input IN base.inputs %]
+    
+    # NOTE: the following variables are for your information only
+    # please make sure to rename any of the variables that you use
+    # to ensure that variable shadowing doesnt become an issue!
+	
+	[%- FOREACH input IN base.inputs %]
     [%- IF input.name.match ('^MISSING_ARTICLE_NAME') %]
     my $[% input.name %][% IF NOT is_simple (input) %]_collection [% END %] = eval { $request->getData->data };
     [%- ELSE %]
     my $[% input.name %][% IF NOT is_simple (input) %]_collection [% END %] = eval { $request->[% input.name %] };
     [%- END %]
+	
     [%- IF is_simple (input) %]
 [% get_members (input_paths.${input.name}, 4) %]
     [%- ELSE %]

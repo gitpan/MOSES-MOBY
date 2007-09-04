@@ -8,9 +8,8 @@
 
 # some command-line options
 use Getopt::Std;
-use vars qw/ $opt_h $opt_d $opt_v $opt_a $opt_s $opt_b $opt_f $opt_u $opt_F $opt_S $opt_t /;
+use vars qw/ $opt_h $opt_d $opt_v $opt_a $opt_s $opt_b $opt_f $opt_u $opt_F $opt_S $opt_t/;
 getopt;
-
 # usage
 if (not($opt_u or $opt_f)) {
 if ($opt_h or (not $opt_a and @ARGV == 0)) {
@@ -73,7 +72,9 @@ if ($opt_f) {
 						cachedir => $generator->cachedir,
     					registry => $generator->registry
     );
+	
     say "Creating the services cache ... may take a few minutes!";
+	say("Using the registry: " . $cache->registry);
     eval{$cache->create_service_cache();};
     say "There was a problem creating the cache:\n$@" if $@;
     say 'Done.' unless $@;

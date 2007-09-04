@@ -33,5 +33,9 @@ config = @LOG4PERL_FILE@
 #parser = XML::LibXML::SAX::Parser
 #parser = XML::SAX::PurePerl
 
+[user_registries]
+user.registries.dir = @USER_REGISTRIES_FILE_DIR@
+user.registries.filename = USER_REGISTRIES
+
 [Mabuhay]
 resource.file = @MABUHAY_RESOURCE@

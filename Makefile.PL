@@ -3,7 +3,7 @@
     
     # Define metadata
     name            'MOSES-MOBY';
-	version 		'0.81';
+	version 		'0.82';
 	license 		'perl';
   	abstract 		'This distribution aids in the creation of BioMOBY perl based web services.';
     all_from        'lib/MOSES/MOBY.pm';
@@ -39,6 +39,7 @@
 	install_script 	'bin/scripts/moses-testing-parser.pl';
 	install_script 	'bin/scripts/moses-testing-service.pl';
 	install_script 	'bin/scripts/moses-universal-testing.pl';
+	install_script 	'bin/scripts/moses-user-registries.pl';
     
 	install_share 	'share';
 	

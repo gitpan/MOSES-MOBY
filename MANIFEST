@@ -11,6 +11,7 @@ bin/scripts/moses-local-cache.pl
 bin/scripts/moses-testing-parser.pl
 bin/scripts/moses-testing-service.pl
 bin/scripts/moses-universal-testing.pl
+bin/scripts/moses-user-registries.pl
 Changes
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
@@ -63,5 +64,7 @@ share/log4perl.properties.template
 share/moby-services.cfg.template
 share/MobyServer.cgi.template
 share/mabuhay.file
+share/USER_REGISTRIES
 share/notes
 t/MOSES-MOBY.t
+t/MOSES-MOBY-Cache.t

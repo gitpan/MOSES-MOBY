@@ -1,4 +1,4 @@
-MOSES-MOBY version .80
+MOSES-MOBY version .82
 ======================
 
 OVERVIEW
@@ -21,6 +21,11 @@ To install this module type the following:
    make
    make test
    make install
+
+UPGRADING
+
+It is extremely important to remove your moby-services.cfg
+file when upgrading to version 0.82!
 
 GETTING STARTED
 

@@ -27,4 +27,7 @@ requires:
   Template: 1.11
   Unicode::String: 2.09
   XML::LibXML: 1.62
-version: 0.8
+  IO::Template: .99
+  Want: 0
+  version: 0
+version: 0.82

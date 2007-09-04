@@ -21,8 +21,6 @@ BEGIN {
 
 __END__
 
-=pod
-
 =head1 NAME
 
 MOSES::MOBY - Perl extension for the automatic generation of BioMOBY web services
@@ -31,20 +29,24 @@ MOSES::MOBY - Perl extension for the automatic generation of BioMOBY web service
 
   # to get started, run the install script
   moses-install.pl
- 
+
   # generate a service implementation, for example HelloBiomobyWorld from samples.jmoby.net
   moses-generate-services.pl samples.jmoby.net HelloBiomobyWorld
- 
+
+  # add your business logic to the module services/HelloBiomobyWorld.pm
+
   # assuming that you have deployed it, test it!
   moses-testing-service.pl -e http://localhost/cgi-bin/MobyServer.cgi HelloBiomobyWorld
- 
+
   # read the POD for more details!
 
 =head1 DESCRIPTION
 
-This is the documentation for Perl MoSeS (Moby Services Support). 
+This is the documentation for Perl MoSeS (Moby Services Support). If you are reading this from the C<perldoc> utility, you may notice that some words are missing or that some phrases are incomplete. In order to view this documentation in the manner intended, please view the html version of this documentation that was installed duing B<make install> or the version on B<CPAN>.
 
-First of all, it is assumed that you are familiar with BioMOBY. If this assumption is false, please go to the BioMOBY homepage (L<http://biomoby.org>).
+First of all, it is assumed that you are familiar with BioMOBY. If this assumption is false, please go to the BioMOBY homepage (L<http://biomoby.org>). 
+
+In addition, this module is used to generate code for BioMOBY web services that are already registered with the registry of your choosing. If the service doesn't exist already, please register it first before proceeding.
 
 Hopefully, you have chosen to install this package so that you can create BioMOBY web services. BioMOBY is a community driven, interoperability project. While the concept is easy to grasp, implementation isn't! 
 
@@ -75,6 +77,8 @@ On Window machines, install as follows:
 =item 	C<nmake install>
 
 =back
+
+B<Important> if you are upgrading to MoSeS-Perl version 0.82 or higher, please remove your C<moby-services.cfg> and remember to L<re-install|"MoSeS Installation"> MoSeS!
 
 =cut
 
@@ -123,7 +127,7 @@ However, before going to gory details, let's install Perl Moses, create and call
 =cut
 
 
-=head3 Five Steps to the First Service
+=head3 Quick Start - Five Steps to the First Service
 
 =over
 
@@ -135,19 +139,12 @@ This will create/update your local cache of a BioMoby registry. Which may take s
 
 From the command prompt, enter:
 
-=begin html
-
-<pre>moses-install</pre>
-
-=end html
+C<moses-install>
 
 or, 
 
-=begin html
+C<moses-install.pl>
 
-<pre>moses-install.pl</pre>
-
-=end html
 
 This works, because part of the installation for the MoSeS module entails the installation of scripts that make MoSeS tasks more simple.
 
@@ -155,33 +152,22 @@ This works, because part of the installation for the MoSeS module entails the in
 
 You can pick up almost any service form the registered ones - just type its authority and name:
 
-=begin html
-
-<pre>moses-generate-services samples.jmoby.net HelloBiomobyWorld</pre>
-
-=end html
+C<moses-generate-services samples.jmoby.net HelloBiomobyWorld>
 
 or,
 
-=begin html
+C<moses-generate-services.pl samples.jmoby.net HelloBiomobyWorld>
 
-<pre>moses-generate-services.pl samples.jmoby.net HelloBiomobyWorld</pre>
 
-=end html
-
-It creates a Perl module Service::HelloBiomobyWorld (in <your-home-directory>/Perl-MoSeS/services/), representing your first BioMoby Web Service . The service is empty - but is already able to accept BioMoby input requests and recognize its own data type, and it produces fake output data - but again, the output data are of the correct type (as registered for this service).
+It creates a Perl module Service::HelloBiomobyWorld (in E<lt>your-home-directoryE<gt>/Perl-MoSeS/services/), representing your first BioMoby Web Service . The service is empty - but is already able to accept BioMoby input requests and recognize its own data type, and it produces fake output data - but again, the output data are of the correct type (as registered for this service).
 
 You can even generate more (or all) services for your authority: 
 
-=begin html
-
-<pre>moses-generate-services.pl samples.jmoby.net</pre>
-
-=end html
+C<moses-generate-services.pl samples.jmoby.net>
 
 =item 4. Make your service available from your Web Server (this is called deploying). 
 
-The only thing you need to do is to tell your Web Server where there is a starting cgi-bin script. The script was already created during the installation in <your-home-directory>/Perl-MoSes/ directory. Make a symbolic link from a cgi-bin directory of your Web Server (e.g on some Linux distributions, using Apache Web server, the cgi-bin directory is /usr/lib/cgi-bin). 
+The only thing you need to do is to tell your Web Server where there is a starting cgi-bin script. The script was already created during the installation in E<lt>your-home-directoryE<gt>/Perl-MoSes/ directory. Make a symbolic link from a cgi-bin directory of your Web Server (e.g on some Linux distributions, using Apache Web server, the cgi-bin directory is /usr/lib/cgi-bin). 
 
 For example:
 
@@ -194,7 +180,7 @@ sudo ln -s /home/senger/Perl-MoSeS/MobyServer.cgi .
 
 =end html
 
-on windows, you can mimic the L<above|"How can I tell apache to execute MobyServer.cgi on Windows without moving the file to cgi-bin/?">
+on windows, you can mimic the L<above|"How can I tell apache to execute MobyServer.cgi on Windows without moving the file to cgi-bin?">
 
 If you cannot create Symbolic links, or apache is not allowed to follow them, try this L<workaround|"Cannot Create Symbolic links">
 
@@ -395,7 +381,7 @@ What registry to use? [default]
      c. default
      d. iCAPTURE
      e. testing
-	 
+&nbsp;
 > a
 Using registry: IRRI (at http://cropwiki.irri.org/cgi-bin/MOBY-Central.pl)<br/>
 
@@ -489,7 +475,7 @@ use vars qw( @ISA );
 @ISA = qw( MOSES::MOBY::Data::VirtualSequence );
 use strict;
 use MOSES::MOBY::Data::Object;
- 
+&nbsp;
 #-----------------------------------------------------------------
 # accessible attributes
 #-----------------------------------------------------------------
@@ -510,7 +496,7 @@ use MOSES::MOBY::Data::Object;
     }
 }<br/><br/>1;<br/>
 ...
-
+&nbsp;
 </pre>
 
 =end html
@@ -561,12 +547,12 @@ First, because it inherits from its base, it already knows how to do all the fea
 #       maintained at http://www.elite.net/~runner/jennifers/hello.htm
 #       by Jennifer Runner.
 #-----------------------------------------------------------------
- 
+&nbsp;
 package Service::Mabuhay;
- 
+&nbsp;
 use FindBin qw( $Bin ); 
 use lib $Bin; 
- 
+&nbsp;
 #-----------------------------------------------------------------
 # This is a mandatory section - but you can still choose one of
 # the two options (keep one and commented out the other):
@@ -579,14 +565,14 @@ BEGIN {
 	(authority     => 'samples.jmoby.net',
 	 service_names => ['Mabuhay']);
 } 
- 
+&nbsp;
 # --- (2) this option uses pre-generated module
 #  You can generate the module by calling a script:
 #    moses-generate-services -b samples.jmoby.net Mabuhay
 #  then comment out the whole option above, and uncomment
 #  the following line (and make sure that Perl can find it):
 #use net::jmoby::samples::MabuhayBase;
- 
+&nbsp;
 # (this to stay here with any of the options above)
 use vars qw( @ISA );
 @ISA = qw( net::jmoby::samples::MabuhayBase );
@@ -604,7 +590,7 @@ Second, it has the code that reads the input, using methods specific for this se
 <pre>
 # read input data (eval to protect against missing data)
 my $language = eval { $request->language };
- 
+&nbsp;
 my $format = eval { $language->format->value };
 my $dotall_mode = eval { $language->dotall_mode->value };
 my $regex = eval { $language->regex->value };
@@ -676,18 +662,22 @@ So, how do all of these pieces fit together? Here we go:
 =head3 Scripts
 
 Scripts
-The scripts are small programs that generate pieces and that let you test things.
- 
-They share some basic features:
- 
-    * They are automatically installed with the perl module.
-    * They can be started from anywhere.
-    * They all are Perl programs, expecting Perl executable in /usr/bin/perl. If your perl is elsewhere, start them as:
 
-      perl -w <script-name>
-	  
-    * They all recognize an option -h, giving a short help. They also have options -v (verbose) and -d (debug) for setting the level of logging.
-    * Usually, they also need additional information (such as where to find local cache) from the configuration file moby-services.cfg. 
+The scripts are small programs that generate pieces and that let you test things.
+
+They share some basic features:
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* They are automatically installed with the perl module.
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* They can be started from anywhere.
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* They all are Perl programs, expecting Perl executable in /usr/bin/perl. If your perl is elsewhere, start them as:
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>E<nbsp>E<nbsp>E<nbsp>E<nbsp>perl -w E<lt>script-nameE<gt>
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* They all recognize an option -h, giving a short help. They also have options -v (verbose) and -d (debug) for setting the level of logging.
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* Usually, they also need additional information (such as where to find local cache) from the configuration file moby-services.cfg. 
 
 Here they are in the alphabetic order:
 
@@ -699,7 +689,7 @@ This script does not do much but gives you overview of your configuration and in
 
 <pre>
 Perl-MoSeS VERSION: 0.8
-
+&nbsp;
 Configuration
 -------------
 Default configuration file: moby-services.cfg
@@ -733,7 +723,7 @@ All imported names (equivalent to parameters above):
         $MOBYCFG::REGISTRY
         $MOBYCFG::XML_PARSER
 XML parser to be used: XML::LibXML::SAX
- 
+&nbsp;
 Logging
 -------
 Logger name (use it in the configuration file): services
@@ -744,7 +734,7 @@ Logging level ERROR: true
 Logging level WARN:  true
 Logging level INFO:  true
 Logging level DEBUG: true 
- 
+&nbsp;
 Testing log messages (some may go only to a logfile):
 2006/07/30 22:44:22 (295) FATAL> [[undef]] config-status.pl:117 - Missing Dunkin' Donuts
 2006/07/30 22:44:22 (296) ERROR> [[undef]] config-status.pl:118 - ...and we are out of coffee!
@@ -789,11 +779,11 @@ An obvious question is "where are the data types generated to"?
 
 You can always determine this after generation by looking in the log file - the message has the INFO level which means it is almost always logged. But, if you want to know in advance here are the rules:
 
-   1. If there is a generators.outdir parameter in the configuration file, it is used. It defines the directory where data types are created.
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>1. If there is a generators.outdir parameter in the configuration file, it is used. It defines the directory where data types are created.
 
-   2. Otherwise, program is trying to find an existing directory named 'generated' anywhere in the @INC (a set of directories used by Perl to locate its modules).
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>2. Otherwise, program is trying to find an existing directory named 'generated' anywhere in the @INC (a set of directories used by Perl to locate its modules).
 
-   3. If it fails, it creates a new directory 'generated' in the "current" directory.
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>3. If it fails, it creates a new directory 'generated' in the "current" directory.
 
 You can use option I<-s> to get the generated result directly on the screen (in that case no file is created).
 
@@ -873,15 +863,17 @@ With options, you can generated other Perl Moses pieces:
 
 <pre>
    Option <strong>-b</strong> generates <a href="#perl_modules_representing_bases_of_service_implementations">service bases</a>,
- 
+&nbsp;
    Option <strong>-t</strong> only updates the <a href="#a_dispatch_table_used_by_a_cgibin_entry_point">dispatch table</a>, and<p/>
    Option <strong>-S</strong> generates both <a href="#perl_modules_representing_bases_of_service_implementations">service bases</a> 
-   and service implementations (and it updates dispatch table, as well).<p/>
+   and service implementations (and it updates dispatch table, as well). 
+   This also influences how the service base will be used at run-time: 
+   if it is already generated (with the -S option) there is no need to 
+   do it again in the run-time - therefore, the service implementation 
+   is generated slightly differently - with an option "use the base, 
+   rather than load the base" enabled.<p/>
    Option <strong>-u</strong> updates the service cache.<p/>
    Option <strong>-f</strong> fills the service cache.<p/>
-   This also influences how the service base will be used at run-time: if it is already generated (with the -S option) there is no need 
-   to do it again in the run-time - therefore, the service implementation is generated slightly differently - with an option 
-   "use the base, rather than load the base" enabled. 
 </pre>
 
 =end html
@@ -957,6 +949,55 @@ This script does not have any options (nor the help).
 
 =cut
 
+=head4 moses-user-registries
+
+The Perl Moses has a hard-coded list of known BioMoby registries. New entries can be added by using this script. Each registry has an abbreviation (a synonym) that can be used in Perl Moses configuration - it is easier and less error-prone than using the long registry's endpoint. This script can allow you to add or remove these registries and in combination with the C<moses-known-registries> script, provide a wealth of information regarding the registries that you use.
+
+C<moses-user-registries>
+
+Before we begin, it should be noted that you cannot remove the hard-coded list of known registries using this tool. Only those registries that you have personally added can be removed.
+
+To begin a session of modification of your persistant user registry store, run the script!
+
+=begin html
+
+<pre>
+
+OK. Module Term::ReadLine is installed.
+Modify Your Persistant Registries
+------------------------------------------------------
+&nbsp;
+Not in over-write mode ...
+&nbsp;
+Would you like to add or remove a registry? [a]
+     a. Add a new persistent user registry
+     b. Remove a persistent user registry
+     c. Quit
+&nbsp;
+</pre>
+
+=end html
+
+When you start the script, you are given 3 choices. 
+
+=over
+
+=item Add a new persistent user registry
+
+=item Remove a persistent user registry
+
+=item Quit
+
+=back
+
+If you choose to add a registry, you will be prompted to enter the various pieces of information need for storing your registry.
+
+Alternatively, you may choose to remove a registry from the list. When you select this option, you will be given the list of registries available and you can attempt to remove them. Only those registries that you have added personally can be removed.
+
+Obviously, choosing to I<Quit> will end the session.
+
+=cut
+
 =head4 moses-local-cache
 
 Local cache is explained in the L<local cache|"Local Cache of a BioMOBY Registry"> section. This script can show what is in the cache. It may be useful for implementing a service because the generated service implementation uses article names as method names - and this script shows all article names.
@@ -979,7 +1020,7 @@ C<moses-local-cache -t DNASequence>
    'module_parent' => 'MOSES::MOBY::Data::NucleotideSequence'
    'name' => 'DNASequence'
    'parent' => 'NucleotideSequence'
-
+&nbsp;
 </pre>
 
 =end html
@@ -1046,7 +1087,9 @@ C<moses-local-cache -xs samples.jmoby.net getRandomImage>
 number (unknown numbers are ignored, and a random image is returned).
 ]]&gt;&lt;/moby:Description&gt;
   &lt;moby:signatureURL xmlns:moby="http://www.biomoby.org/moby"/&gt;
-  &lt;moby:URL xmlns:moby="http://www.biomoby.org/moby"&gt;http://mobycentral.icapture.ubc.ca:8090/axis/services/getRandomImage&lt;/moby:URL&gt;
+  &lt;moby:URL xmlns:moby="http://www.biomoby.org/moby"&gt;
+      http://mobycentral.icapture.ubc.ca:8090/axis/services/getRandomImage
+  &lt;/moby:URL&gt;
   &lt;moby:authoritativeService xmlns:moby="http://www.biomoby.org/moby"&gt;1&lt;/moby:authoritativeService&gt;
   &lt;moby:Input xmlns:moby="http://www.biomoby.org/moby"&gt;
     &lt;moby:Simple xmlns:moby="http://www.biomoby.org/moby" moby:articleName="imageNumber"&gt;
@@ -1075,16 +1118,16 @@ C<moses-local-cache -i>
 <pre>
 Currently used registry: default
 (it can be changed in moby-services.cfg) 
- 
+ &nbsp;
    contact     : Edward Kawas (edward.kawas@gmail.com)
    endpoint    : http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl
    name        : iCAPTURE Centre, Vancouver
    namespace   : http://mobycentral.icapture.ubc.ca/MOBY/Central
    public      : yes
    text        : A curated public registry hosted at the iCAPTURE Centre, Vancouver 
- 
+&nbsp;
 Statictics for all locally cached registries: 
- 
+&nbsp;
 Registry         Data types   Authorities   Services
 IRRI                    305            61        553
 MIPS                     54             9        165
@@ -1130,14 +1173,17 @@ In both modes, the script can send an input XML file to the service - but if the
 
 When calling the service locally, you may use the following options/parameters:
 
-        * A mandatory package name - a full package name of the called service.
-        * Option -l location can be used to specify a directory where is the called service stored. Default is src/Perl/services.
-        * Options -v and -d make also sense in this mode (but not in the other one).
-        * An optional input file name. 
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* A mandatory package name - a full package name of the called service.
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* Option -l location can be used to specify a directory where is the called service stored. Default is src/Perl/services.
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* Options -v and -d make also sense in this mode (but not in the other one).
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* An optional input file name. 
 
 C<moses-testing-service -d Service::HelloBiomobyWorld>
 
-The output of this call was already shown in this L<documentation|"Five Steps to the First Service">. Therefore, just look what debug messages were logged (notice the -d option used):
+The output of this call was already shown in this L<documentation|"Quick Start - Five Steps to the First Service">. Therefore, just look what debug messages were logged (notice the -d option used):
 
 =begin html
 
@@ -1157,9 +1203,11 @@ The output of this call was already shown in this L<documentation|"Five Steps to
 
 The full mode has the following options/parameters:
 
-        * A mandatory service name (not a package name) of the called service.
-        * A mandatory endpoint -e endpoint defining where is the service located. Actually, presence of this parameter decides which mode is used.
-        * An optional input file name. 
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* A mandatory service name (not a package name) of the called service.
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* A mandatory endpoint -e endpoint defining where is the service located. Actually, presence of this parameter decides which mode is used.
+
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* An optional input file name. 
 
 =begin html
 
@@ -1309,25 +1357,25 @@ The file format is as defined by the C<Config::Simple>. It can be actually of se
 <pre>
 cachedir = /home/senger/Perl-MoSeS/myCache
 registry = default
-
+&nbsp;
 [generators]
 outdir = /home/senger/Perl-MoSeS/generated
 impl.outdir = /home/senger/Perl-MoSeS/services
 impl.package.prefix = Service
 impl.services.table = SERVICES_TABLE
 #ignore.existing.types = true
-
+&nbsp;
 [log]
 config = /home/senger/Perl-MoSeS/log4perl.properties
 #file = /home/senger/Perl-MoSeS/services.log
 #level = info
 #pattern = "%d (%r) %p> [%x] %F{1}:%L - %m%n"
-
+&nbsp;
 [xml]
 #parser = XML::LibXML::SAX
 #parser = XML::LibXML::SAX::Parser
 #parser = XML::SAX::PurePerl
-
+&nbsp;
 [Mabuhay]
 resource.file = /home/senger/Perl-MoSeS/sample-resources/mabuhay.file
 </pre>
@@ -1471,7 +1519,9 @@ The logging configuration can be done in three ways:
 =over
 
 =item * Do nothing.
+
 =item * Edit log4perl.properties file.
+
 =item * Edit logging configuration options in moby-services.cfg. 
 
 =back
@@ -1495,13 +1545,13 @@ The I<log4perl.properties> is created (in the installation time) from the I<log4
 
 <pre>
 log4perl.logger.services = INFO, Screen, Log
-    
+&nbsp; 
 log4perl.appender.Screen = Log::Log4perl::Appender::Screen
 log4perl.appender.Screen.stderr = 1
 log4perl.appender.Screen.Threshold = FATAL
 log4perl.appender.Screen.layout = Log::Log4perl::Layout::PatternLayout
 log4perl.appender.Screen.layout.ConversionPattern = %d (%r) %p> [%x] %F{1}:%L - %m%n
-  
+&nbsp;
 log4perl.appender.Log = Log::Log4perl::Appender::File
 log4perl.appender.Log.filename = /home/senger/moby-live/Java/src/scripts/../Perl/services.log
 log4perl.appender.Log.mode = append
@@ -1516,7 +1566,7 @@ It says: Log only INFO (and above) levels (so no DEBUG messages are logged) on t
 
 Note that printing to STDERR means that the message will go to the error.log file of your Web Server.
 
-To change the log level to DEBUG, replace INFo by DEBUG in the first line.
+To change the log level to DEBUG, replace INFO by DEBUG in the first line.
 
 The message format (unless you change the Perl Moses default way) means:
 
@@ -1535,24 +1585,24 @@ Where:
 =begin html
 
 <ul>
-  <li class="tiny"> <font size="-1"><b>1</b></font> (%d) - Current date
+  <li> <font size="-1"><b>1</b></font> (%d) - Current date
 in yyyy/MM/dd hh:mm:ss format
-  </li><li class="tiny"> <font size="-1"><b>2</b></font> (%r) - Number of
+  </li><li> <font size="-1"><b>2</b></font> (%r) - Number of
 milliseconds elapsed from program start to logging
    event
-  </li><li class="tiny"> <font size="-1"><b>3</b></font> (%p) - Level
+  </li><li> <font size="-1"><b>3</b></font> (%p) - Level
 (priority) of the logging event
-  </li><li class="tiny"> <font size="-1"><b>4</b></font> (%x) - Process ID
+  </li><li> <font size="-1"><b>4</b></font> (%x) - Process ID
 (kind of a <em>user session</em>)
-  </li><li class="tiny"> <font size="-1"><b>5</b></font> (%F) - File where
+  </li><li> <font size="-1"><b>5</b></font> (%F) - File where
 the logging event occurred (unfortunately, it is not always that
 useful - when it happens in an <em>eval</em> block - which often
 does).
-  </li><li class="tiny"> <font size="-1"><b>6</b></font> (%L) - Line number
+  </li><li> <font size="-1"><b>6</b></font> (%L) - Line number
 within the file where the log statement was issued
-  </li><li class="tiny"> <font size="-1"><b>7</b></font> (%m) - The message
+  </li><li> <font size="-1"><b>7</b></font> (%m) - The message
 to be logged
-  </li><li class="tiny"> <font size="-1"><b>8</b></font> (%n) - Newline
+  </li><li> <font size="-1"><b>8</b></font> (%n) - Newline
 
 </li></ul>
 
@@ -1615,18 +1665,18 @@ whole script:
 </ul>
 <pre>
       use strict;
-
+&nbsp;
       use SOAP::Transport::HTTP;
-
+&nbsp;
       # --- established in the install.pl time
       use lib '/home/senger/Perl-MoSeS';
       use lib '/home/senger/Perl-MoSeS/generated';
       use lib '/home/senger/Perl-MoSeS/services';
-
+&nbsp;
       # --- list of all services served by this script
       use vars qw ( $DISPATCH_TABLE );
       require "SERVICES_TABLE";
-
+&nbsp;
       # --- accept request and call wanted service
       my $x = new SOAP::Transport::HTTP::CGI;
       $x->dispatch_with ($DISPATCH_TABLE);
@@ -1664,7 +1714,7 @@ BEGIN {
         (authority     => 'samples.jmoby.net',
          service_names => ['Mabuhay']);
 }
- 
+&nbsp;
 # --- (2) this option uses pre-generated module
 #  You can generate the module by calling a script:
 #    moses-generate-services -b samples.jmoby.net Mabuhay
@@ -1689,20 +1739,20 @@ Perhaps the best way how to close this section is to show a full implementation 
 <pre>
 sub process_it {
     my ($self, $request, $response, $context) = @_;
- 
+&nbsp;
     # read (some) input data
     # (use eval to protect against missing data)
     my $language = eval { $request->language };
     my $regex = eval { $language->regex->value };
     my $ignore_cases = eval { $language->case_insensitive->value };
- 
+&nbsp;
     # set an exception if data are not complete
     unless ($language and $regex) {
 	$response->record_error ( { code => INPUTS_INVALID,
 				    msg  => 'Input regular expression is missing.' } );
 	return;
     }
- 
+&nbsp;
     # creating an answer (this is the "business logic" of this service)
     my @result_hellos = ();
     my @result_langs = ();
@@ -1719,7 +1769,7 @@ sub process_it {
 	}
     }
     close HELLO;
- 
+&nbsp;
     foreach my $idx (0 .. $#result_hellos) {
 	$response->add_hello (new MOSES::MOBY::Data::simple_key_value_pair
 			      ( key   => $self->as_uni_string ($result_langs[$idx]),
@@ -1734,9 +1784,10 @@ sub process_it {
 When you go through the code above you notice how to do basic things that almost every service has to do. Which are:
 
 Reading input data:
-    The possible methods were already pre-generated for you so you know what methods to use. But you should always check if the data are really there (the clients can send you rubbish, of course).
 
-    What was not pre-generated are the methods accessing ID and NAMESPACE. Their names are, not surprisingly, id and namespace. For example, the Mabuhay input is named language (as seen in the code above), so you can call:
+The possible methods were already pre-generated for you so you know what methods to use. But you should always check if the data are really there (the clients can send you rubbish, of course).
+
+What was not pre-generated are the methods accessing ID and NAMESPACE. Their names are, not surprisingly, id and namespace. For example, the Mabuhay input is named language (as seen in the code above), so you can call:
 
 =begin html
 
@@ -1755,7 +1806,7 @@ Reporting exceptions:
 
 <pre>
     One option is to throw an exception:
-
+&nbsp;
     open HELLO, $MOBYCFG::MABUHAY_RESOURCE_FILE
          or $self->throw ('Mabuhay resource file not found.');
 </pre>
@@ -1813,7 +1864,7 @@ Creating and adding cross-references:
         ( id        => 'At263644',
           namespace => 'TIGR'
         );
-
+&nbsp;
      # create an advanced cross-reference
      my $advanced_xref = new MOSES::MOBY::Data::Xref
         ( id           => 'X112345',
@@ -1823,7 +1874,7 @@ Creating and adding cross-references:
           evidenceCode => 'IEA',
           xrefType     => 'transform'
         );
-
+&nbsp;
     # add them to the output object (which has an article name 'greeting')
     $response->greeting->add_xrefs ($simple_xref);
     $response->greeting->add_xrefs ($advanced_xref);
@@ -1843,7 +1894,7 @@ Creating a service note:<br/>
 
 =head2 FAQ
 
-=head3 How can I tell apache to execute MobyServer.cgi on Windows without moving the file to cgi-bin/?
+=head3 How can I tell apache to execute MobyServer.cgi on Windows without moving the file to cgi-bin?
 
 =begin html
 
@@ -1875,6 +1926,24 @@ Creating a service note:<br/>
 
 =cut
 
+=head3 How Can Apache Follow Symbolic links?
+
+Add the following to the end of your httpd.conf file:
+
+=begin html
+
+<pre>
+    &lt;Directory &quot;/path/to/cgi-bin&quot; &gt;
+	    Options +FollowSymLinks
+	&lt;/Directory&gt;
+</pre>
+
+=end html
+
+Make sure to change I</path/to/cgi-bin> to be the real path to your cgi-bin directory!
+
+=cut
+
 =head3 Cannot Create Symbolic links
 
 If you cannot create symbolic links, another tested alternative would be to copy your file B<MobyServer.cgi> to the I<cgi-bin> directory of your web server.
@@ -1887,6 +1956,18 @@ That's all there is to it! Now when you test your services, remember that your f
 
 =cut
 
+=head3 When I run the install script, IO::Prompt complains ...
+
+This could mean that the package C<IO::Prompt> is not installed properly.
+
+What version do you have?
+
+C<perl -MIO::Prompt -e'print "$IO::Prompt::VERSION\n";'>
+
+We have tested version 0.99.2 on both *nix machines and windows. Please make sure that you have  that version. If you do not, please remove the one that you have (the cpan module B<CPAN Plus> is very useful here) and install version 0.99.2! Version 0.99.4 doesnt seem to work too well and produces numerous warnings in our module. Other versions have yet to be tested.
+
+=cut
+
 =cut
 
 =head2 Missing Features
@@ -1895,13 +1976,13 @@ There will be always bugs waiting to be fixed. Please let us know about them.
 
 And there are features (and known) bugs that should or could be implemented (or fixed). Here are those I am aware of (B = bug, N = not yet implemented, F = potential future feature):
 
-    * (B) Article names containing dashes and spaces are still "escaped" in the XML output. They should be kept as registered.
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* (B) Article names containing dashes and spaces are still "escaped" in the XML output. They should be kept as registered.
 
-    * (N) Documentation of the Perl Modules is unfinished, and links to it are not yet included in this document. This is an important part of the documentation because it expands hints how to write your own service implementation.
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* (N) Documentation of the Perl Modules is unfinished, and links to it are not yet included in this document. This is an important part of the documentation because it expands hints how to write your own service implementation.
 
-    * (N) The generated service implementation could have a better Perl documentation, listing all available methods for inputs and outputs (the methods are already shown in the code, but having them also in the POD would help).
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* (N) The generated service implementation could have a better Perl documentation, listing all available methods for inputs and outputs (the methods are already shown in the code, but having them also in the POD would help).
 
-    * (F) The service bases could have option to validate namespaces - as it is now in CommonSubs.pm.
+E<nbsp>E<nbsp>E<nbsp>E<nbsp>* (F) The service bases could have option to validate namespaces - as it is now in CommonSubs.pm.
 
 I will try to keep up-to-date the list of the recent changes in the ChangeLog L<http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Java/docs/Perl-ChangeLog>. 
 
@@ -1909,11 +1990,11 @@ I will try to keep up-to-date the list of the recent changes in the ChangeLog L<
 
 =head2 Acknowledgement
 
-The main developers (whom please direct your suggestions and reports to) are Martin Senger and Eddie Kawas.
+The main developers (whom please direct your suggestions and reports to) are Martin Senger and Edward Kawas.
 
-However, there would be no MoSeS without BioMoby - flowers go to Mark Wilkinson from the University of British Columbia. Also and of course, nothing could be done without enthusiastic support from the BioMoby community.
+However, there would be no MoSeS without BioMoby - the BioMoby project was established through an award from Genome Prairie and Genome Alberta, in part through Genome Canada, a not-for-profit corporation leading Canada's national strategy on genomics.  We acknowledge the support of the EPSRC through the myGrid (GR/R67743/01, EP/C536444/1, EP/D044324/1, GR/T17457/01) e-Science projects, the INB (Spanish National Institute for Bioinformatics), funded by FundaciE<oacute>n Genoma EspaE<ntilde>a, and the Generation Challenge Programme (GCP; http://www.generationcp.org) of the CGIAR.
 
-Martin Senger was developing the project in the frame of the Generation Challenge Programme, getting non-nonsense support from Richard Bruskiewich from the International Rice Research Institute in Philippines, and high motivation to work with Perl from Mathieu Rouard from INIBAP. 
+Martin Senger was developing the project in the frame of the Generation Challenge Programme, getting no-nonsense support from Richard Bruskiewich from the International Rice Research Institute in Philippines, and high motivation to work with Perl from Mathieu Rouard from INIBAP. 
 
 =cut
 

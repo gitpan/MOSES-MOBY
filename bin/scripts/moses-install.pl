@@ -124,7 +124,7 @@ sub prompt_for_registry {
     my @regs = MOSES::MOBY::Cache::Registries->list;
     my $registry = pprompt ("What registry to use? [default] ",
 			   -m => [@regs]);
-    $registry ||= 'default';
+    return $registry ||= 'default';
 }
 
 # create a file from a template
@@ -265,10 +265,7 @@ if ('y' eq pprompt ('Should I try to fill or update the local cache [y]? ', -ynd
 		say 'Using registry: ' . $registry;
 		say "(at $endpoint)\n";
 	
-		my $cache = MOSES::MOBY::Cache::Central->new (cachedir => $cachedir);
-		$cache->_namespace($uri);
-		$cache->_endpoint($endpoint);
-		
+		my $cache = MOSES::MOBY::Cache::Central->new (cachedir => $cachedir, registry=>$registry);
 		say "Getting the BioMOBY datatypes ...\n";
 		eval {
 			$cache->update_datatype_cache();
@@ -302,13 +299,14 @@ if (-e $config_file and ! $opt_F) {
 	($config_file,
 	 File::ShareDir::dist_file('MOSES-MOBY','moby-services.cfg.template'),
 	 'Configuration file',
-	 { '@CACHE_DIR@'        => $cachedir,
-	   '@REGISTRY@'         => $registry,
-	   '@GENERATED_DIR@'    => $generated_dir,
-	   '@SERVICES_DIR@'     => $services_dir,
-	   '@SERVICES_TABLE@'   => $services_table,
-	   '@LOG4PERL_FILE@'    => $log4perl_file,
-	   '@LOGFILE@'          => $log_file1,
+	 { '@CACHE_DIR@'        		=> $cachedir,
+	   '@REGISTRY@'         		=> $registry,
+	   '@GENERATED_DIR@'    		=> $generated_dir,
+	   '@SERVICES_DIR@'     		=> $services_dir,
+	   '@SERVICES_TABLE@'   		=> $services_table,
+	   '@LOG4PERL_FILE@'    		=> $log4perl_file,
+	   '@LOGFILE@'          		=> $log_file1,
+	   '@USER_REGISTRIES_FILE_DIR@'	=> $pmoses_home,
 	   '@MABUHAY_RESOURCE@' =>
 	       "$samples_home/mabuhay.file",
 	   } );
@@ -324,6 +322,21 @@ file_from_template
 	($mabuhay_file,
 	 File::ShareDir::dist_file('MOSES-MOBY', 'mabuhay.file'),
 	 'Mabuhay Resource File',
+	 {} );
+}
+
+# install the user_registries file 
+my $registries_file =  "$MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR/$MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME" 
+	if $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR and $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME;
+$registries_file = File::Spec->catfile("$pmoses_home","USER_REGISTRIES") if not $registries_file or $registries_file eq "";
+if (-e $registries_file and ! $opt_F) {
+    say "User Registrie file $registries_file exists.";
+    say "It will be used and not overwritten unless you start 'install.pl -F'.\n";
+} else {
+file_from_template
+	($registries_file,
+	 File::ShareDir::dist_file('MOSES-MOBY', "USER_REGISTRIES"),
+	 'User Registries File',
 	 {} );
 }
 

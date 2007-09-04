@@ -112,7 +112,7 @@ Details are in L<MOSES::MOBY::Base>. Here just a list of them:
 =item B<cachedir>
 
 A mandatory parameter containing a name of a local directory where is
-a Moby cache. The Moby cache directory can contain mor caches (from
+a Moby cache. The Moby cache directory can contain more caches (from
 more Moby registries). The location points to the top-level directory
 name. For example, if we have the following directory structure
 (containing caches from four different Moby registries):
@@ -141,6 +141,11 @@ synonyms in L<MOSES::MOBY::Cache::Registries>.
 For a default registry, use string 'default' (but there is no need to
 do so: default is default by default).
 
+=item B<registries>
+
+An object of type MOSES::MOBY::Cache::Registries that you can manipulate to add 
+more registries. See more about this object in L<MOSES::MOBY::Cache::Registries>.
+
 =back
 
 =cut
@@ -149,9 +154,9 @@ do so: default is default by default).
     my %_allowed =
 	(
 	 cachedir  => undef,
+	 registries=> new MOSES::MOBY::Cache::Registries,
 	 registry  => { type => MOSES::MOBY::Base->STRING,
 			post => \&_check_registry },
-
 	 # undocumented, for internal use only (so far)
 	 datatypes => {type => 'MOSES::MOBY::Def::DataType', is_array => 1},
 #	 services  => {type => 'MOSES::MOBY::Def::Service',  is_array => 1},
@@ -174,6 +179,7 @@ sub _check_registry {
     $self->{registry} = $self->{registry} || $MOBYCFG::REGISTRY || 'default';
 }
 
+
 #-----------------------------------------------------------------
 
 =head1 SUBROUTINES
@@ -189,9 +195,9 @@ sub _endpoint {
     my ($self, $registry) = @_;
     $registry ||= $self->registry;
     return $registry if $registry =~ m"^http://";
-    my $reg = MOSES::MOBY::Cache::Registries->get ($registry);
+    my $reg = $self->registries->get ($registry);
     return $reg->{endpoint} if $reg;
-    return MOSES::MOBY::Cache::Registries->get ('default')->{endpoint};
+    return $self->registries->get ('default')->{endpoint};
 }
 
 #-----------------------------------------------------------------
@@ -203,9 +209,9 @@ sub _namespace {
     my ($self, $registry) = @_;
     $registry ||= $self->registry;
     return $registry if $registry =~ m"^http://";
-    my $reg = MOSES::MOBY::Cache::Registries->get ($registry);
+    my $reg = $self->registries->get ($registry);
     return $reg->{namespace} if $reg;
-    return MOSES::MOBY::Cache::Registries->get ('default')->{namespace};
+    return $self->registries->get ('default')->{namespace};
 }
 
 
@@ -217,6 +223,7 @@ sub init {
     $self->SUPER::init();
     $self->registry ($MOBYCFG::REGISTRY || 'default');
     $self->cachedir ($MOBYCFG::CACHEDIR);
+	$self->registries( new MOSES::MOBY::Cache::Registries);
     $self->datatypes ([]);
 #    $self->services ([]);
 }
@@ -491,7 +498,7 @@ sub create_service_cache {
 				sub {
 					my $soap = shift;
 					my $res  = shift;
-					$self->throw ("There was a problem calling the registry: " . $self->_endpoint . "\@ " . $self->_namespace . ".\n" + $res);	
+					$self->throw ("There was a problem calling the registry: " . $self->_endpoint . "\@ " . $self->_namespace . ".\n" . $res);	
 				}
 			  );
 
@@ -594,7 +601,7 @@ sub update_service_cache {
 				sub {
 					my $soap = shift;
 					my $res  = shift;
-					$self->throw ("There was a problem calling the registry: " . $self->_endpoint . "\@ " . $self->_namespace . ".\n" + $res);	
+					$self->throw ("There was a problem calling the registry: " . $self->_endpoint . "\@ " . $self->_namespace . ".\n" . $res);	
 				}
 			  );
 
@@ -1206,7 +1213,7 @@ sub cache_exists {
 
 
 #-----------------------------------------------------------------
-# cache_exists
+# create_cache_dirs
 #-----------------------------------------------------------------
 
 =head2 create_cache_dirs
@@ -1237,7 +1244,6 @@ sub create_cache_dirs {
     	}
     }
 }
-
 
 1;
 __END__

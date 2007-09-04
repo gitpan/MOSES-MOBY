@@ -1,0 +1,11 @@
+%USER_REGISTRIES = (
+#                    iCAPTURE => { 
+#                                  endpoint  => 'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl',
+#                                  namespace => 'http://mobycentral.icapture.ubc.ca/MOBY/Central',
+#                                  name      => 'iCAPTURE Centre, Vancouver',
+#                                  contact   => 'Edward Kawas (edward.kawas@gmail.com)',
+#                                  public    => 'yes',
+#                                  text      => 'A curated public registry hosted at the iCAPTURE Centre, Vancouver',
+#                                 },
+
+                    );
