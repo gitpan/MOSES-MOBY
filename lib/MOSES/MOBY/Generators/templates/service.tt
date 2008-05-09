@@ -143,6 +143,7 @@ use MOSES::MOBY::Package;
 use MOSES::MOBY::ServiceException;
 use strict;
 
+my %valid_namespaces = ( [% FOREACH ns IN input_ns %] '[%ns%]'=>1,  [% END %]);
 #-----------------------------------------------------------------
 # process_it
 #    This method is called for every job in the client request.
@@ -169,11 +170,23 @@ sub process_it {
 	
     [%- IF is_simple (input) %]
 [% get_members (input_paths.${input.name}, 4) %]
+    # perform namespace checking for inputs to this service
+#   do {
+#       $response->record_error ( { code => INPUT_INCORRECT_NAMESPACE,
+#                                   msg  => 'This service requires inputs under the namespaces: {"' . join(',', keys %valid_namespaces) . '"}' } );
+#       return;
+#   } unless $valid_namespaces{$namespace};
     [%- ELSE %]
     if (defined $[% input.name %]_collection) {
         foreach my $[% input.name %]_element (@{ $[% input.name %]_collection }) {
             my $[% input.name %] = $[% input.name %]_element->data;
 [% get_members (input_paths.${input.name}, 12) %]
+            # perform namespace checking for inputs to this service
+        #   do {
+        #       $response->record_error ( { code => INPUT_INCORRECT_NAMESPACE,
+        #                                   msg  => 'This service requires inputs under the namespaces: { "' . join(',', keys %valid_namespaces) . '"}' } );
+        #       return;
+        #   } unless $valid_namespaces{$namespace};
         }
     }
     [%- END %]

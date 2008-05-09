@@ -5,7 +5,7 @@
 #
 # For copyright and disclaimer see below.
 #
-# $Id: GenServices.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: GenServices.pm,v 1.5 2008/04/29 19:58:37 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Generators::GenServices;
@@ -20,6 +20,10 @@ use MOSES::MOBY::Generators::Utils;
 use MOSES::MOBY::Generators::GenTypes;
 use MOSES::MOBY::Def::Relationship;
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # A list of allowed attribute names. See MOSES::MOBY::Base for details.
@@ -212,11 +216,25 @@ sub generate_impl {
 	    $input_paths{$main_name} = $self->_tree2paths ($tree);
 	}
 #	print MOSES::MOBY::Base->toString (\%input_paths);
-
 	# create implementation specific object
 	my $impl = {
 	    package => ($args{impl_prefix} || 'Service') . '::' . $name,
 	};
+	my @input_ns = ();
+        foreach my $in (@{ $obj->inputs }) {
+
+	    if (ref ($in) eq 'MOSES::MOBY::Def::PrimaryDataSimple') {
+                foreach my $ns ( @{$in->namespaces} ) {
+                    push @input_ns, $ns->name;
+                }
+            } else {
+                foreach my $sim (@{ $in->elements }) {
+                    foreach my $ns ( @{$sim->namespaces} ) {
+                        push @input_ns, $ns->name;
+                    }
+                }
+            }
+        }
 	if ($args{outcode}) {
 	    $tt->process ( $input, { base         => $obj,
 				     impl         => $impl,
@@ -224,6 +242,7 @@ sub generate_impl {
 				     get_children => $ref_sub_get_children,
 				     ref          => $ref_sub_ref,
                                      input_paths  => \%input_paths,
+				     input_ns     =>,\@input_ns,
 				 },
 			   $args{outcode} ) || $LOG->logdie ($tt->error());
 	} else {
@@ -244,12 +263,90 @@ sub generate_impl {
 				     get_children => $ref_sub_get_children,
 				     ref          => $ref_sub_ref,
                                      input_paths  => \%input_paths,
+                                     input_ns     => \@input_ns,
 				 },
 			   $outfile ) || $LOG->logdie ($tt->error());
 	    $LOG->info ("Created $outfile\n");
 	}
     }
 }
+
+#-----------------------------------------------------------------
+# generate_cgi
+#-----------------------------------------------------------------
+sub generate_cgi {
+    my ($self, @args) = @_;
+    my %args =
+	( # some default values
+	  outdir        => $self->outdir . "/../cgi",
+	  cachedir      => $self->cachedir,
+	  registry      => $self->registry,
+	  service_names => [],
+
+	  # other args, with no default values
+	  # authority     => 'authority'
+	  # outcode       => ref SCALAR
+
+	  # and the real parameters
+	  @args );
+    $self->_check_outcode (%args);
+    
+    my $outdir = File::Spec->rel2abs ($args{outdir});
+    $LOG->debug ("Arguments for generating cgi services: " . $self->toString (\%args))
+	if ($LOG->is_debug);
+    $LOG->info ("CGI Services will be generated into: '$outdir'")
+	unless $args{outcode};
+
+    # get objects from a local cache
+    my $cache = MOSES::MOBY::Cache::Central->new (cachedir => $args{cachedir}, registry => $args{registry});
+    my @names = ();
+    push (@names, $args{authority}, @{ $args{service_names} })
+	if $args{authority};
+    my @services = $cache->get_services (@names);
+
+    # generate from template
+    my $tt = Template->new ( ABSOLUTE => 1 );
+    my $input = File::Spec->rel2abs ( MOSES::MOBY::Generators::Utils->find_file
+				      ($Bin,
+				       'MOSES', 'MOBY', 'Generators', 'templates',
+				       'service-cgi.tt') );
+
+    foreach my $obj (@services) {
+	my $name = $obj->name;
+	$LOG->debug ("$name\n");
+	if ($args{outcode}) {
+	    # check if the same service is already loaded
+	    # (it can happen when this subroutine is called several times)
+	    next if eval '%' . $obj->module_name . '::';
+	    $tt->process ( 
+	    	$input, 
+	    	{ 
+	    		obj 		  => $obj, 
+	    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
+	    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
+	    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
+	    	},
+			$args{outcode} )
+		 || $LOG->logdie ($tt->error());
+	} else {
+	    # we cannot easily check whether the same file was already
+	    # generated - so we don't
+	    my $outfile =
+		File::Spec->catfile ( $outdir, split (/\./, $obj->authority), $obj->name )
+		. '.cgi';
+	    $tt->process ( $input, 
+	    	{ 
+	    		obj 		  => $obj, 
+	    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
+	    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
+	    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
+	    	},
+			   $outfile ) || $LOG->logdie ($tt->error());
+		chmod 0755, $outfile;
+	}
+    }
+}
+
 
 #-----------------------------------------------------------------
 # update_table

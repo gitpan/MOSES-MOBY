@@ -4,13 +4,17 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: ProvisionInformation.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: ProvisionInformation.pm,v 1.4 2008/04/29 19:35:57 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Data::ProvisionInformation;
 use base ("MOSES::MOBY::Base");
 use MOSES::MOBY::Tags;
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 

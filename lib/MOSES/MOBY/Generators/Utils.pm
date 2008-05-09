@@ -4,16 +4,22 @@
 #         Edward Kawas <edward.kawas@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Utils.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: Utils.pm,v 1.4 2008/04/29 19:45:10 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Generators::Utils;
 use File::Spec;
 use strict;
 
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+
 =head1 NAME
 
 MOSES::MOBY::Utils - what does not fit elsewhere
+
+=cut
 
 =head1 SYNOPSIS
 
@@ -21,9 +27,13 @@ MOSES::MOBY::Utils - what does not fit elsewhere
  use MOSES::MOBY::Generators::Utils;
  my $file = MOSES::MOBY::Generators::Utils->find_file ('resource.file');
  
+=cut
+
 =head1 DESCRIPTION
 
 General purpose utilities.
+
+=cut
 
 =head1 AUTHORS
 

@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Package.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: Package.pm,v 1.4 2008/04/29 19:45:01 kawas Exp $
 #-----------------------------------------------------------------
 
 #-----------------------------------------------------------------
@@ -18,6 +18,10 @@ use XML::LibXML;
 use MOSES::MOBY::Tags;
 use MOSES::MOBY::ServiceException;
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # A list of allowed attribute names. See MOSES::MOBY::Base for details.

@@ -5,7 +5,7 @@
 #
 # For copyright and disclaimer see below.
 #
-# $Id: Parser.pm,v 1.3 2006/10/16 18:37:14 kawas Exp $
+# $Id: Parser.pm,v 1.4 2008/04/29 19:45:01 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Parser;
@@ -22,6 +22,10 @@ use MOSES::MOBY::Package;
 use MOSES::MOBY::ServiceException;
 use MOSES::MOBY::Generators::GenTypes;
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # A list of allowed attribute names. See MOSES::MOBY::Base for details.
@@ -227,7 +231,7 @@ sub start_element {
 		$xref->id( $self->getValue( attributes=>$element->{Attributes}, name=>OBJ_ID ) );
 		$xref->namespace(
 				 $self->getValue( attributes=>$element->{Attributes}, name=>OBJ_NAMESPACE ) );
-		$xref->isSimpleXref(1);
+		#$xref->isSimpleXref(1);
 		push @objectStack, \$xref;
 	    }
 	}

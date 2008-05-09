@@ -2,27 +2,35 @@
 #
 # Generate datatypes.
 #
-# $Id: generate-datatypes.pl,v 1.6 2006/10/13 22:08:39 senger Exp $
+# $Id: moses-generate-datatypes.pl,v 1.4 2008/05/09 20:26:04 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
 # some command-line options
 use Getopt::Std;
-use vars qw/ $opt_h $opt_f $opt_u $opt_d $opt_v $opt_s /;
-getopt;
+use vars qw/ $opt_h $opt_f $opt_R $opt_u $opt_d $opt_v $opt_s /;
+getopts('hfudvsR:');
 
 # usage
 if ($opt_h) {
     print STDOUT <<'END_OF_USAGE';
 Generate datatypes.
-Usage: [-vds] [data-type-name] [data-type-name...]
-	   [-uf]
+Usage: [-R registry-string] [-vds] [data-type-name] [data-type-name...]
+	   [-R registry-string] [-uf]
 	   
     It also needs to get a location of a local cache (and potentially
     a BioMoby registry endpoint, and an output directory). It takes
     it from the 'moby-service.cfg' configuration file.
 
     If no data type given it generates all of them.
+
+    -R ... a registry string in the form:
+               registry-url[@registry-uri]
+           where registry-uri is optional.
+           For example: 
+              http://localhost/cgi-bin/MOBY-Central.pl
+           or
+              http://localhost/cgi-bin/MOBY-Central.pl@http://localhost/MOBY/Central
 
     -s ... show generated code on STDOUT
            (no file is created, disabled when no data type name given)
@@ -46,8 +54,14 @@ $LOG->level ('DEBUG') if $opt_d;
 
 sub say { print @_, "\n"; }
 
+if ($opt_R) {
+	my @r = split(/\@/, $opt_R);
+	$opt_R = $r[0];
+}
 
 my $generator = new MOSES::MOBY::Generators::GenTypes;
+$generator->registry($opt_R) if $opt_R;
+
 if ($opt_f) {
 	my $cache = MOSES::MOBY::Cache::Central->new (
 						cachedir => $generator->cachedir,

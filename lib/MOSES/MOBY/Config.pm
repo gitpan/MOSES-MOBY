@@ -3,7 +3,7 @@
 # Author: Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Config.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: Config.pm,v 1.4 2008/04/29 19:45:01 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Config;
@@ -12,6 +12,10 @@ use File::Spec;
 use File::HomeDir;
 use vars qw( $DEFAULT_CONFIG_FILE $ENV_CONFIG_DIR );
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 my %Config = ();     # here are all configuration parameters
 my %Unsuccess = ();  # here are names (and reasons) of failed files

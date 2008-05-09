@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Central.pm,v 1.5 2007/07/31 17:51:42 kawas Exp $
+# $Id: Central.pm,v 1.6 2008/05/09 20:21:48 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Cache::Central;
@@ -21,7 +21,7 @@ use SOAP::Lite;
 use XML::LibXML;
 use File::Spec;
 use strict;
-use vars qw ($DEFAULT_REGISTRY_URL);
+use vars qw ($DEFAULT_REGISTRY_URL $VERSION);
 
 # names of cache directories/files
 use constant LIST_FILE          => '__L__I__S__T__';
@@ -30,9 +30,14 @@ use constant SERVICES_CACHE     => 'services';
 use constant NAMESPACES_CACHE   => 'namespaces';
 use constant SERVICETYPES_CACHE => 'serviceTypes';
 
+# the version of this file:
+$VERSION = sprintf "%d.%02d", q$Revision: 1.6 $ =~ /: (\d+)\.(\d+)/;
+
 =head1 NAME
 
 MOSES::MOBY::Cache::Central - access to locally cached Moby entities
+
+=cut
 
 =head1 SYNOPSIS
 
@@ -208,7 +213,7 @@ sub _endpoint {
 sub _namespace {
     my ($self, $registry) = @_;
     $registry ||= $self->registry;
-    return $registry if $registry =~ m"^http://";
+    return "http://localhost/MOBY/Central" if $registry =~ m"^http://";
     my $reg = $self->registries->get ($registry);
     return $reg->{namespace} if $reg;
     return $self->registries->get ('default')->{namespace};

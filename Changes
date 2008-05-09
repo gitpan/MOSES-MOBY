@@ -1,12 +1,32 @@
 Revision history for Perl extension MOSES::MOBY.
 
-.84 Wed Dec 12 12:52:35 2007
+.85 Fri May 9 7:52:35 2008
+	- fixed a bug in Parser.pm that created xrefs 
+	and called non-existent method isSimpleXref.
+	- added namespace checking for inputs. It is
+	inserted into impl code that is generated, but
+	is commented out.
+	- added $VERSION to every module. As a result,
+	some of the modules have large increments in
+	version numbers with little changes to back up
+	the jump. Sorry.
+	- added support for 'cgi' category moby services
+	- updated the makefile to correctly identify the
+	version of IO::Prompt to use so that users dont
+	have to downgrade when they accidently install
+	the wrong version (i.e. 0.99.4)
+	- added a new -R option to the generate-* scripts.
+	This option allows you to specify a registry URL
+	to use when generating moses scripts.
+	
+
+.84 Tue Dec 11 7:52:35 2007
 	- updated the default moby url to be the 
-          new ucalgary one because the one hosted 
-          at icapture died
+	  new ucalgary one because the one hosted 
+        at icapture died
 	- made the default 'SAX' parser XML::LibXML.
-          This isn't really a SAX parser, but it 
-          seems to be the only reliable option
+	  This isn't really a SAX parser, but it 
+        seems to be the only reliable option
 
 .82 Tue Sept 4 10:21:26 2007
 	- updated the documentation to make

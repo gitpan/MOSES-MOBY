@@ -2,7 +2,7 @@
 #
 # Generate and call all BioMoby services (without SOAP).
 #
-# $Id: universal-testing.pl,v 1.3 2006/10/13 22:08:39 senger Exp $
+# $Id: moses-universal-testing.pl,v 1.3 2008/02/21 00:12:55 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 

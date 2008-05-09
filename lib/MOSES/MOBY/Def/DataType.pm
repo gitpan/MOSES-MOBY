@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: DataType.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: DataType.pm,v 1.4 2008/04/29 19:41:17 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Def::DataType;
@@ -12,6 +12,10 @@ use base qw( MOSES::MOBY::Base );
 use MOSES::MOBY::Def::Relationship;
 use XML::LibXML;
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 

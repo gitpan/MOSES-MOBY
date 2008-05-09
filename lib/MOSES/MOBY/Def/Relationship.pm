@@ -4,13 +4,17 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Relationship.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: Relationship.pm,v 1.4 2008/04/29 19:41:31 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Def::Relationship;
 use base qw( MOSES::MOBY::Base Exporter );
 use strict;
 use vars qw( @EXPORT %ALLOWED_TYPES );
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 # relationship types
 use constant ISA  => 'ISA';

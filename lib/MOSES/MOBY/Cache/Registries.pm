@@ -3,13 +3,17 @@
 # Author: Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Registries.pm,v 1.2 2006/12/05 17:18:15 senger Exp $
+# $Id: Registries.pm,v 1.4 2008/04/29 19:29:54 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Cache::Registries;
 use MOSES::MOBY::Base;
 use base qw ( MOSES::MOBY::Base);
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # A hard-coded list of the known registries.
@@ -28,7 +32,7 @@ my %REGISTRIES =
 		    name      => 'Sun Centre of Excellence, Calgary',
 		    contact   => 'Edward Kawas (edward.kawas@gmail.com)',
 		    public    => 'yes',
-		    text      => 'A curated public registry hosted at the Sun Centre of Excellence, Calgary',
+		    text      => 'A curated public registry hosted at U of C, Calgary',
 		},
       IRRI     => { endpoint  => 'http://cropwiki.irri.org/cgi-bin/MOBY-Central.pl',
 		    namespace => 'http://cropwiki.irri.org/MOBY/Central',

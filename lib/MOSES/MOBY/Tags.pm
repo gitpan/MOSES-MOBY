@@ -1,6 +1,11 @@
 package MOSES::MOBY::Tags;
 use strict;
 use vars qw( @ISA @EXPORT );
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+
 BEGIN {
 	@ISA = qw( Exporter );
 	@EXPORT = qw(

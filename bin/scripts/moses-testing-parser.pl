@@ -2,7 +2,7 @@
 #
 # Testing parser of BioMoby XML inputs.
 #
-# $Id: testing-parser.pl,v 1.4 2006/10/13 22:08:39 senger Exp $
+# $Id: moses-testing-parser.pl,v 1.3 2008/02/21 00:12:55 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 

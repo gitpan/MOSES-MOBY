@@ -2,22 +2,24 @@
 #
 # Calling a BioMoby services (with or without SOAP).
 #
-# $Id: testing-service.pl,v 1.8 2007/05/09 13:09:53 kawas Exp $
+# $Id: moses-testing-service.pl,v 1.6 2008/05/06 16:52:48 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
 BEGIN {
     # some command-line options
     use Getopt::Std;
-    use vars qw/ $opt_h $opt_d $opt_v $opt_l $opt_e /;
-    getopts ('hdvl:e:');
+    use vars qw/ $opt_h $opt_d $opt_v $opt_l $opt_e $opt_c /;
+    getopts ('hdvl:e:c:');
 
     # usage
-    if ($opt_h or @ARGV == 0) {
+    if ($opt_h or (@ARGV == 0 and (not $opt_c))) {
 	print STDOUT <<'END_OF_USAGE';
 Calling a BioMoby services (without using SOAP, just locally).
 Usage: # calling a local module representing a service, without using SOAP
        [-vd] [-l <lib-location>] <package-name> [<input-file>]
+       or
+       [-vd] -c <service-url> [<input-file>]
 
        It also needs a location of a local cache (and potentially a
        BioMoby registry endpoint). It takes it from the
@@ -25,6 +27,9 @@ Usage: # calling a local module representing a service, without using SOAP
 
        # calling a real service, using SOAP
        -e <service-url> <service-name> [<input-file>]
+
+       # calling a real service, using cgi
+       -c <service-url> [<input-file>]
 
     <package-name> is a full name of a called module (service)
         e.g. Service::Mabuhay
@@ -36,6 +41,10 @@ Usage: # calling a local module representing a service, without using SOAP
     -e <service-url>
         A service endpoint
         (e.g. http://localhost/cgi-bin/MobyServer.cgi)
+
+    -c <cgi-service-url>
+        A cgi biomoby service url
+        (e.g. http://localhost/cgi-bin/HelloBiomobyWorld.cgi)
 
     <input-file>
         A BioMoby XML file with input data.
@@ -55,7 +64,13 @@ END_OF_USAGE
 	eval "use SOAP::Lite; 1;"
 	    or die "$@\n";
 
-    } else {
+    } elsif ($opt_c) {
+    	# calling a real service, using cgi
+    	eval "use HTTP::Request; 1;"
+	    or die "$@\n";
+	    eval "use LWP::UserAgent; 1;"
+	    or die "$@\n";
+    }else {
 	# calling a local service module, without SOAP
 	eval "use MOSES::MOBY::Base; 1;";
 	# take the lib location from the config file
@@ -81,9 +96,9 @@ END_OF_XML
 }
 
 # --- what service to call
-my $module = shift;   # eg. Service::Mabuhay, or just Mabuhay
+my $module = shift unless $opt_c;   # eg. Service::Mabuhay, or just Mabuhay
 my $service;
-($service = $module) =~ s/.*:://;
+($service = $module) =~ s/.*::// unless $opt_c;
 
 # --- call the service
 if ($opt_e) {
@@ -114,6 +129,26 @@ if ($opt_e) {
     print $soap
 	-> $service (SOAP::Data->type('string' => "$input"))
         -> result;
+
+} elsif ($opt_c) {
+    # calling a real service, using cgi
+    my $ua = LWP::UserAgent->new;
+ 
+    my $input = '';
+    if (@ARGV > 0) {
+	my $data = shift;     # a file name
+	open INPUT, "<$data"
+	    or die "Cannot read '$data': $!\n";
+	while (<INPUT>) { $input .= $_; }
+	close INPUT;
+    } else {
+	$input = _empty_input;
+    }
+
+	my $req = HTTP::Request->new(POST => $opt_c);
+	$req->content_type('application/x-www-form-urlencoded');
+	$req->content("data=$input");
+	print "\n" . $ua->request($req)->as_string . "\n";
 
 } else {
     # calling a local service module, without SOAP

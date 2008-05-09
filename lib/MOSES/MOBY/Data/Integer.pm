@@ -4,12 +4,16 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Integer.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: Integer.pm,v 1.4 2008/04/29 19:35:57 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Data::Integer;
 use base ("MOSES::MOBY::Data::Object");
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 

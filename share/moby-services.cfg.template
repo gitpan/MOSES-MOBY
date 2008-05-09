@@ -8,7 +8,7 @@
 # Perl's @INC array. Keeping it in this directory is usually fine
 # because the MOBY code must be found by Perl anyway.
 #
-# $Id: moby-services.cfg.template,v 1.7 2006/07/31 15:23:34 senger Exp $
+# $Id: moby-services.cfg.template,v 1.3 2008/02/21 00:12:55 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # ---------------------------------------------------------------
 

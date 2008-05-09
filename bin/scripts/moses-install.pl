@@ -2,7 +2,7 @@
 #
 # Prepare the stage...
 #
-# $Id: install.pl,v 1.7 2006/11/11 23:04:34 senger Exp $
+# $Id: moses-install.pl,v 1.4 2008/04/29 19:59:43 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
@@ -179,6 +179,18 @@ eval {
 	}
 };
 say $@ ? $@ : "Created install directory '$pmoses_home'.";
+
+# create install directory if necessary
+eval {
+	my ($v, $d, $f) = File::Spec->splitpath( $pmoses_home . "/cgi" );
+	my $dir = File::Spec->catdir($v);
+	foreach my $part ( File::Spec->splitdir( ($d.$f ) ) ) {
+	   	$dir = File::Spec->catdir($dir, $part);
+   		next if -d $dir or -e $dir;
+	    mkdir( $dir ) || die("Error creating installation directory directory '".$dir."':\n$!");
+	}
+};
+say $@ ? $@ : "Created install directory '$pmoses_home/cgi'.";
 
 # create install directory if necessary
 eval {

@@ -3,7 +3,7 @@
 # Author: Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Base.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: Base.pm,v 1.4 2008/04/29 19:43:18 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Base;
@@ -31,8 +31,8 @@ BEGIN {
     @ISA = qw( Exporter );
     @EXPORT = qw( $LOG );
 
-    $VERSION = 0.8;
-    $Revision  = '$Id: Base.pm,v 1.1 2006/10/13 21:51:16 senger Exp $';
+    $VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+    $Revision  = '$Id: Base.pm,v 1.4 2008/04/29 19:43:18 kawas Exp $';
 
     # initiate error handling
     require Carp; import Carp qw( confess );

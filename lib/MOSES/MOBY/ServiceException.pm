@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: ServiceException.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: ServiceException.pm,v 1.4 2008/04/29 19:45:01 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::ServiceException;
@@ -12,6 +12,10 @@ use base qw( MOSES::MOBY::Base Exporter );
 use MOSES::MOBY::Tags;
 use strict;
 use vars qw( @EXPORT );
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 my %severityNames = ();
 my %codeNames     = ();

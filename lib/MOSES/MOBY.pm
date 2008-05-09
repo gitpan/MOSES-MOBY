@@ -4,10 +4,10 @@ use strict;
 use warnings;
 
 
-use vars qw{$VERSION};
-use vars qw{ @ISA @EXPORT @EXPORT_OK };
+
+use vars qw{$VERSION @ISA @EXPORT @EXPORT_OK};
 BEGIN {
-	$VERSION   = '0.84';
+	$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 	@ISA       = qw{ Exporter };
 	@EXPORT    = qw{};
 	@EXPORT_OK = qw{};
@@ -18,7 +18,6 @@ BEGIN {
 # Preloaded methods go here.
 
 1;
-
 __END__
 
 =head1 NAME
@@ -318,6 +317,9 @@ The other modules needed are (all available from the CPAN):
 
 =item *
     FindBin
+
+=item *
+    IO::Prompt - try to install version 0.99.2 and not 0.99.4
 
 =back
 
@@ -787,9 +789,11 @@ E<nbsp>E<nbsp>E<nbsp>E<nbsp>3. If it fails, it creates a new directory 'generate
 
 You can use option I<-s> to get the generated result directly on the screen (in that case no file is created).
 
-You can use the option B<-u> updates the datatype cache.
+You can use the option B<-u> to update the datatype cache.
 
-You can use the option B<-f> fills the datatype cache.
+You can use the option B<-f> to fill the datatype cache.
+
+The B<-R> option allows you to specify a registry endpoint. For instance, -R http://moby.ucalgary.ca/moby/MOBY-Central.pl would cause the script to use UCalgary registry.
 
 The BioMoby primitive types (String, Integer, Float, Boolean and DateTime) are never generated. They were created manually.
 
@@ -874,6 +878,10 @@ With options, you can generated other Perl Moses pieces:
    rather than load the base" enabled.<p/>
    Option <strong>-u</strong> updates the service cache.<p/>
    Option <strong>-f</strong> fills the service cache.<p/>
+   Option <strong>-R</strong> allows you to specify a registry endpoint.
+       For instance, 
+             <em>-R http://moby.ucalgary.ca/moby/MOBY-Central.pl</em>
+       would cause the script to use UCalgary registry.
 </pre>
 
 =end html
@@ -1904,7 +1912,7 @@ Creating a service note:<br/>
   <em>ScriptAlias /cgi-bin/</em></li>
   <li>Underneath this text, enter something like the following (replace Eddie with your username):<br /> 
   <em>ScriptAlias /services/ &quot;C:/Documents and Settings/Eddie/Perl-MoSeS/&quot;</em></li>
-  <li> Just below this, after the <em>&lt;/IfModule&gt;</em> line, add the following text (replace Eddie with your username):
+  <li> Just below this, after the <em>&lt;/IfModule&gt;</em> line, add the following text (replace Eddie with your username and the directory with your directory):
     <pre>
       &lt;Directory &quot;C:/Documents and Settings/Eddie/Perl-MoSeS&quot;&gt;
          AllowOverride None
@@ -1950,7 +1958,7 @@ If you cannot create symbolic links, another tested alternative would be to copy
 
 It is B<highly recommended> that you change the name of the file if you anticipate other users B<copying their files> to the cgi-bin directory as well!
 
-Once the file has been copied, then change the ownership of the file to the web servers' user/group.
+Once the file has been copied, change the ownership of the file to the web servers' user/group. Also, make sure that the path (and its parents) to all of the directories in the 'use lib ...' are readable by your web server. 
 
 That's all there is to it! Now when you test your services, remember that your file may no longer be called MobyServer.cgi, but something else that you named it!
 
@@ -1998,20 +2006,25 @@ Martin Senger was developing the project in the frame of the Generation Challeng
 
 =cut
 
-=head2 EXPORT
+=head1 EXPORT
 
 None by default.
 
 
 =head1 SEE ALSO
 
-For the most up-to-date documentation, visit the Perl MoSes online documentation:
+=head2 Tutorials on building services
+
+For some tutorials on using Perl MoSeS:
 
 =begin html
 
-	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Java/docs/PerlMoses.html' target='_blank'>Perl MoSeS - Online</a>
+	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_soap_service.html' target='_blank'>Tutorial for creating SOAP based Biomoby Services</a><br/>
+	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_cgi_service.html' target='_blank'>Tutorial for creating CGI based Biomoby Services</a>
 
 =end html
+
+=cut
 
 If you have questions or comments, please feel free to message us on the following mailing lists:
 

@@ -2,7 +2,7 @@
 #
 # Prepare the stage...
 #
-# $Id: moeses-user-registries.pl,v 1.7 2006/11/11 23:04:34 senger Exp $
+# $Id: moses-user-registries.pl,v 1.3 2008/02/21 00:12:55 kawas Exp $
 # Contact: Edward Kawas <edward.kawas@gmail.com>
 # -----------------------------------------------------------
 

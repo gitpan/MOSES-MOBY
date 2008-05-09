@@ -1,10 +1,12 @@
 ---
 abstract: 'This distribution aids in the creation of BioMOBY perl based web services.'
+author:
+  - 'Edward Kawas (edward.kawas [at] gmail [dot] com)'
 build_requires:
   ExtUtils::MakeMaker: 6.11
   Test::More: 0.42
 distribution_type: module
-generated_by: 'Module::Install version 0.67'
+generated_by: 'Module::Install version 0.72'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -13,21 +15,24 @@ name: MOSES-MOBY
 no_index:
   directory:
     - bin/scripts
+    - share
+    - share
     - inc
     - t
 requires:
   Carp: 0
+  Class::Inspector: 1.17
   Config::Simple: 4.58
   File::HomeDir: 0.65
   File::ShareDir: 0.05
-  File::Spec: 0.80
+  File::Spec: 0.8
+  IO::Prompt: 0.99.2
   IO::Stringy: 2.11
   Log::Log4perl: 1.12
+  Params::Util: 0.28
   SOAP::Lite: 0.69
   Template: 1.11
   Unicode::String: 2.09
   XML::LibXML: 1.62
-  IO::Template: .99
-  Want: 0
-  version: 0
-version: 0.82
+version: 0.85
+

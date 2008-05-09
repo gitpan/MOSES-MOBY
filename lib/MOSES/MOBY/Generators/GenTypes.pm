@@ -5,7 +5,7 @@
 #
 # For copyright and disclaimer see below.
 #
-# $Id: GenTypes.pm,v 1.1 2006/10/13 21:51:16 senger Exp $
+# $Id: GenTypes.pm,v 1.4 2008/04/29 19:42:56 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Generators::GenTypes;
@@ -19,6 +19,10 @@ use MOSES::MOBY::Cache::Central;
 use MOSES::MOBY::Generators::Utils;
 use vars qw( %PRIMITIVE_TYPES );
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # A list of allowed attribute names. See MOSES::MOBY::Base for details.

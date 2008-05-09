@@ -4,7 +4,7 @@
 #         Edward Kawas <edward.kawas@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: ServiceBase.pm,v 1.1 2006/10/13 21:51:17 senger Exp $
+# $Id: ServiceBase.pm,v 1.4 2008/04/29 19:43:44 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Service::ServiceBase;
@@ -15,6 +15,10 @@ use SOAP::Lite;
 use MOSES::MOBY::Package;
 
 use strict;
+
+# add versioning to this module
+use vars qw /$VERSION/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # prepare_output

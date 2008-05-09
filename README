@@ -1,17 +1,18 @@
-MOSES-MOBY version .82
+MOSES-MOBY version .85
 ======================
 
 OVERVIEW
 
-Perl Moses is a generator of Perl code - but this 
-code does not need to be always stored in files, 
-it can be generated on-the-fly every time a 
-service is called. Also, there are up to four 
-things to be generated: objects representing
-BioMoby data types, classes establishing bases 
-for services, empty (but working) service
-implementation modules, and cgi-bin scripts,
-the entry points to BioMoby services.
+Perl MoSeS is a generator of Perl based BioMOBY
+web services (SOAP & CGI based). This module
+will hopefully help all those service providers
+that have something to offer, but don't want to
+get overwhelmed by the BioMOBY services protocol.
+
+Perl MoSeS takes care of all data marshalling and
+un-marshalling, web service transporting, and much
+more, leaving the service provider the sole task 
+of providing the business logic for their service.
 
 INSTALLATION
 
@@ -49,6 +50,7 @@ IO::Stringy
 Unicode::String
 File::HomeDir
 File::ShareDir
+IO::Prompt - unless you are using Windows
 
 COPYRIGHT AND LICENCE
 
@@ -57,5 +59,3 @@ Copyright (c) 2006 Martin Senger, Edward Kawas. All Rights Reserved.
 This module is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
 This software is provided "as is" without warranty of any kind.
-
-
