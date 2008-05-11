@@ -7,7 +7,7 @@ use warnings;
 
 use vars qw{$VERSION @ISA @EXPORT @EXPORT_OK};
 BEGIN {
-	$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+	$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
 	@ISA       = qw{ Exporter };
 	@EXPORT    = qw{};
 	@EXPORT_OK = qw{};
@@ -876,6 +876,8 @@ With options, you can generated other Perl Moses pieces:
    do it again in the run-time - therefore, the service implementation 
    is generated slightly differently - with an option "use the base, 
    rather than load the base" enabled.<p/>
+   Option <strong>-c</strong> generates both a <a href="#perl_modules_representing_bases_of_service_implementations">service base</a> 
+     as well as a CGI dispatcher script.<p/>
    Option <strong>-u</strong> updates the service cache.<p/>
    Option <strong>-f</strong> fills the service cache.<p/>
    Option <strong>-R</strong> allows you to specify a registry endpoint.

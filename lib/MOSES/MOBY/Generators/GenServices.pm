@@ -5,7 +5,7 @@
 #
 # For copyright and disclaimer see below.
 #
-# $Id: GenServices.pm,v 1.5 2008/04/29 19:58:37 kawas Exp $
+# $Id: GenServices.pm,v 1.6 2008/05/10 00:23:05 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Generators::GenServices;
@@ -23,7 +23,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.6 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # A list of allowed attribute names. See MOSES::MOBY::Base for details.
@@ -332,8 +332,7 @@ sub generate_cgi {
 	    # we cannot easily check whether the same file was already
 	    # generated - so we don't
 	    my $outfile =
-		File::Spec->catfile ( $outdir, split (/\./, $obj->authority), $obj->name )
-		. '.cgi';
+		File::Spec->catfile ( $outdir, split (/\./, $obj->authority), $obj->name ) . '.cgi';
 	    $tt->process ( $input, 
 	    	{ 
 	    		obj 		  => $obj, 
@@ -342,7 +341,9 @@ sub generate_cgi {
 	    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
 	    	},
 			   $outfile ) || $LOG->logdie ($tt->error());
-		chmod 0755, $outfile;
+		chmod (0755, $outfile);
+		$LOG->info ("\tCGI service created at '$outfile'\n");
+		 
 	}
     }
 }

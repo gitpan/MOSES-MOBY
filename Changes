@@ -1,6 +1,9 @@
 Revision history for Perl extension MOSES::MOBY.
 
 .85 Fri May 9 7:52:35 2008
+	- fixed a bug in one of the test cases.
+	
+.85 Fri May 9 7:52:35 2008
 	- fixed a bug in Parser.pm that created xrefs 
 	and called non-existent method isSimpleXref.
 	- added namespace checking for inputs. It is

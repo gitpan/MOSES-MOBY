@@ -21,7 +21,7 @@ $registry = new MOSES::MOBY::Cache::Registries;
 can_ok($registry, ("get", "list", "add", "remove", "all"));
 
 # get should return default registry details
-ok($registry->get->{endpoint} eq 'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl', "Check the 'get' method returns the default registry") or diag("'" . $registry->get->{endpoint} . "' was not expected.");
+ok($registry->get->{endpoint} eq 'http://moby.ucalgary.ca/moby/MOBY-Central.pl', "Check the 'get' method returns the default registry") or diag("'" . $registry->get->{endpoint} . "' was not expected.");
 
 # shouldnt be able to add to persistent store, but should be in memory (0).
 my $ret = $registry->add(
