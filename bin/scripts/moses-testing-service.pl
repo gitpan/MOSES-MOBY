@@ -2,19 +2,20 @@
 #
 # Calling a BioMoby services (with or without SOAP).
 #
-# $Id: moses-testing-service.pl,v 1.6 2008/05/06 16:52:48 kawas Exp $
+# $Id: moses-testing-service.pl,v 1.7 2008/09/02 17:58:02 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
 BEGIN {
-    # some command-line options
-    use Getopt::Std;
-    use vars qw/ $opt_h $opt_d $opt_v $opt_l $opt_e $opt_c /;
-    getopts ('hdvl:e:c:');
 
-    # usage
-    if ($opt_h or (@ARGV == 0 and (not $opt_c))) {
-	print STDOUT <<'END_OF_USAGE';
+	# some command-line options
+	use Getopt::Std;
+	use vars qw/ $opt_h $opt_d $opt_v $opt_l $opt_e $opt_c $opt_a /;
+	getopts('hdvl:e:c:a:');
+
+	# usage
+	if ( $opt_h or ( @ARGV == 0 and ( not $opt_c ) ) ) {
+		print STDOUT <<'END_OF_USAGE';
 Calling a BioMoby services (without using SOAP, just locally).
 Usage: # calling a local module representing a service, without using SOAP
        [-vd] [-l <lib-location>] <package-name> [<input-file>]
@@ -31,6 +32,9 @@ Usage: # calling a local module representing a service, without using SOAP
        # calling a real service, using cgi
        -c <service-url> [<input-file>]
 
+       # calling a real service, using SOAP
+       -a <service-url> <service-name> [<input-file>]
+
     <package-name> is a full name of a called module (service)
         e.g. Service::Mabuhay
 
@@ -46,6 +50,10 @@ Usage: # calling a local module representing a service, without using SOAP
         A cgi biomoby service url
         (e.g. http://localhost/cgi-bin/HelloBiomobyWorld.cgi)
 
+    -a <asynchronous service-url>
+        An asynchronous service url
+        (e.g. http://localhost/cgi-bin/AsyncMobyServer.cgi)
+
     <input-file>
         A BioMoby XML file with input data.
         Default: an empty BioMoby request
@@ -54,38 +62,49 @@ Usage: # calling a local module representing a service, without using SOAP
     -d ... debug
     -h ... help
 END_OF_USAGE
-    exit (0);
-    }
+		exit(0);
+	}
 
-#    use MOSES::MOBY::Base;
-    # load modules, depending on the mode of calling
-    if ($opt_e) {
-	# calling a real service, using SOAP
-	eval "use SOAP::Lite; 1;"
-	    or die "$@\n";
+	# use MOSES::MOBY::Base;
+	# load modules, depending on the mode of calling
+	if ($opt_e) {
 
-    } elsif ($opt_c) {
-    	# calling a real service, using cgi
-    	eval "use HTTP::Request; 1;"
-	    or die "$@\n";
-	    eval "use LWP::UserAgent; 1;"
-	    or die "$@\n";
-    }else {
-	# calling a local service module, without SOAP
-	eval "use MOSES::MOBY::Base; 1;";
-	# take the lib location from the config file
-	require lib ; lib->import (MOSES::MOBY::Config->param ("generators.impl.outdir"));
-	require lib ; lib->import (MOSES::MOBY::Config->param ("generators.outdir"));
-	unshift (@INC, $opt_l) if $opt_l;
-	$LOG->level ('INFO') if $opt_v;
-	$LOG->level ('DEBUG') if $opt_d;
-    }
+		# calling a real service, using SOAP
+		eval "use SOAP::Lite; 1;"
+		  or die "$@\n";
+	} elsif ($opt_c) {
+
+		# calling a real service, using cgi
+		eval "use HTTP::Request; 1;"
+		  or die "$@\n";
+		eval "use LWP::UserAgent; 1;"
+		  or die "$@\n";
+	} else {
+
+		# calling a local service module, without SOAP
+		eval "use MOSES::MOBY::Base; 1;";
+
+		# take the lib location from the config file
+		require lib;
+		lib->import( MOSES::MOBY::Config->param("generators.impl.outdir") );
+		require lib;
+		lib->import( MOSES::MOBY::Config->param("generators.outdir") );
+		unshift( @INC, $opt_l ) if $opt_l;
+		$LOG->level('INFO')  if $opt_v;
+		$LOG->level('DEBUG') if $opt_d;
+	}
+	# load these modules always to get constants and to avoid warnings
+	eval "use MOBY::Async::LSAE; 1;"
+	  or die "$@\n";
+	eval "use MOBY::Async::WSRF; 1;"
+	  or die "$@\n";
+	
 }
 
 use strict;
 
 sub _empty_input {
-    return <<'END_OF_XML';
+	return <<'END_OF_XML';
 <?xml version="1.0" encoding="UTF-8"?>
 <moby:MOBY xmlns:moby="http://www.biomoby.org/moby">
   <moby:mobyContent>
@@ -95,78 +114,286 @@ sub _empty_input {
 END_OF_XML
 }
 
+sub _get_query_ids {
+	my $input = shift;
+	my @query_ids = ();
+	my $parser    = XML::LibXML->new();
+	my $doc       = $parser->parse_string($input);
+	my $iterator  = $doc->getElementsByLocalName("mobyData");
+	for ( 1 .. $iterator->size() ) {
+		my $node = $iterator->get_node($_);
+		my $id   = $node->getAttribute("queryID")
+		  || $node->getAttribute(
+				 $node->lookupNamespacePrefix($WSRF::Constants::MOBY_MESSAGE_NS)
+				   . ":queryID" );
+		push @query_ids, $id;
+	}
+	return @query_ids;
+}
+
 # --- what service to call
-my $module = shift unless $opt_c;   # eg. Service::Mabuhay, or just Mabuhay
+my $module = shift unless $opt_c;    # eg. Service::Mabuhay, or just Mabuhay
 my $service;
-($service = $module) =~ s/.*::// unless $opt_c;
+( $service = $module ) =~ s/.*::// unless $opt_c;
 
 # --- call the service
 if ($opt_e) {
-    # calling a real service, using SOAP
-    my $soap = SOAP::Lite
-	-> uri ("http://biomoby.org/")
-	-> proxy ($opt_e)
-	-> on_fault (sub {
-	    my $soap = shift;
-	    my $res = shift;
-	    my $msg =
-		ref $res ? "--- SOAP FAULT ---\n" . $res->faultcode . " " . $res->faultstring
-		: "--- TRANSPORT ERROR ---\n" . $soap->transport->status . "\n$res\n";
-	    die $msg;
-	});
 
-    my $input = '';
-    if (@ARGV > 0) {
-	my $data = shift;     # a file name
-	open INPUT, "<$data"
-	    or die "Cannot read '$data': $!\n";
-	while (<INPUT>) { $input .= $_; }
-	close INPUT;
-    } else {
-	$input = _empty_input;
-    }
+	# calling a real service, using SOAP
+	my $soap = SOAP::Lite->uri("http://biomoby.org/")->proxy($opt_e)->on_fault(
+		sub {
+			my $soap = shift;
+			my $res  = shift;
+			my $msg =
+			  ref $res
+			  ? "--- SOAP FAULT ---\n"
+			  . $res->faultcode . " "
+			  . $res->faultstring
+			  : "--- TRANSPORT ERROR ---\n"
+			  . $soap->transport->status
+			  . "\n$res\n";
+			die $msg;
+		}
+	);
 
-    print $soap
-	-> $service (SOAP::Data->type('string' => "$input"))
-        -> result;
+	my $input = '';
+	if ( @ARGV > 0 ) {
+		my $data = shift;    # a file name
+		open INPUT, "<$data"
+		  or die "Cannot read '$data': $!\n";
+		while (<INPUT>) { $input .= $_; }
+		close INPUT;
+	} else {
+		$input = _empty_input;
+	}
+
+	print $soap ->$service( SOAP::Data->type( 'string' => "$input" ) )->result;
 
 } elsif ($opt_c) {
-    # calling a real service, using cgi
-    my $ua = LWP::UserAgent->new;
- 
-    my $input = '';
-    if (@ARGV > 0) {
-	my $data = shift;     # a file name
-	open INPUT, "<$data"
-	    or die "Cannot read '$data': $!\n";
-	while (<INPUT>) { $input .= $_; }
-	close INPUT;
-    } else {
-	$input = _empty_input;
-    }
 
-	my $req = HTTP::Request->new(POST => $opt_c);
+	# calling a real service, using cgi
+	my $ua = LWP::UserAgent->new;
+
+	my $input = '';
+	if ( @ARGV > 0 ) {
+		my $data = shift;    # a file name
+		open INPUT, "<$data"
+		  or die "Cannot read '$data': $!\n";
+		while (<INPUT>) { $input .= $_; }
+		close INPUT;
+	} else {
+		$input = _empty_input;
+	}
+
+	my $req = HTTP::Request->new( POST => $opt_c );
 	$req->content_type('application/x-www-form-urlencoded');
 	$req->content("data=$input");
 	print "\n" . $ua->request($req)->as_string . "\n";
 
+} elsif ($opt_a) {
+
+	# calling a real service, using async soap
+	# call using async mode for async service ... _submit
+	$service .= "_submit";
+
+	# set up the wsrf call
+	my $soap = WSRF::Lite->proxy($opt_a)->uri($WSRF::Constants::MOBY)->on_fault(
+		sub {
+			my $soap = shift;
+			my $res  = shift;
+			my $msg =
+			  ref $res
+			  ? "--- SOAP FAULT ---\n"
+			  . $res->faultcode . " "
+			  . $res->faultstring
+			  : "--- TRANSPORT ERROR ---\n"
+			  . $soap->transport->status
+			  . "\n$res\n";
+			die $msg;
+		}
+	);
+
+	# get the input
+	my $input = '';
+	if ( @ARGV > 0 ) {
+		my $data = shift;    # a file name
+		open INPUT, "<$data"
+		  or die "Cannot read '$data': $!\n";
+		while (<INPUT>) { $input .= $_; }
+		close INPUT;
+	} else {
+		$input = _empty_input;
+	}
+
+	# extract all of the query ids from $input
+	my @query_ids = _get_query_ids($input);
+	print "\nSending the following data to $service asynchronously:\n",
+	  $input, "\n"
+	  if $opt_v;
+
+	# submit the job
+	my $epr =
+	  ( $soap->$service( SOAP::Data->type( 'string' => "$input" ) )->result );
+
+	# Get address from the returned Endpoint Reference
+	my $address = $epr->{'EndpointReference'}->{Address};
+
+	# Get resource identifier from the returned Endpoint Reference
+	my $identifier =
+	  $epr->{'EndpointReference'}->{ReferenceParameters}->{ServiceInvocationId};
+
+	# Compose the Endpoint Reference
+	my $EPR = WSRF::WS_Address->new();
+	$EPR->Address($address);
+	$EPR->ReferenceParameters(   '<mobyws:ServiceInvocationId xmlns:mobyws="'
+							   . $WSRF::Constants::MOBY . '">'
+							   . $identifier
+							   . '</mobyws:ServiceInvocationId>' );
+	my %completed = ();
+	while (1) {
+		foreach my $queryID (@query_ids) {
+
+			# skip poll if current job completed
+			next if $completed{$queryID};
+
+			# poll the service for given query ID
+			my $searchTerm = "";
+			$searchTerm .=
+"<wsrp:ResourceProperty xmlns:wsrp='$WSRF::Constants::WSRP' xmlns:mobyws='$WSRF::Constants::MOBY'>";
+			$searchTerm .= "mobyws:status_" . $queryID;
+			$searchTerm .= "</wsrp:ResourceProperty>";
+
+			$soap = WSRF::Lite->uri($WSRF::Constants::WSRP)->on_action(
+				sub {
+					sprintf '%s/%s/%sRequest', $WSRF::Constants::WSRPW, $_[1],
+					  $_[1];
+				}
+			  )->wsaddress($EPR)
+			  ->GetMultipleResourceProperties(
+								  SOAP::Data->value($searchTerm)->type('xml') );
+
+			my $parser = XML::LibXML->new();
+			my $xml    = $soap->raw_xml;
+			my $doc    = $parser->parse_string($xml);
+			$soap = $doc->getDocumentElement();
+			my $prop_name = "status_" . $queryID;
+
+			my ($prop) =
+			  $soap->getElementsByTagNameNS( $WSRF::Constants::MOBY,
+											 $prop_name )
+			  || $soap->getElementsByTagName($prop_name);
+			my $event = $prop->getFirstChild->toString
+			  unless ref $prop eq "XML::LibXML::NodeList";
+			$event = $prop->pop()->getFirstChild->toString
+			  if ref $prop eq "XML::LibXML::NodeList";
+
+			my $status = LSAE::AnalysisEventBlock->new($event);
+			if ( $status->type == LSAE_PERCENT_PROGRESS_EVENT ) {
+				if ( $status->percentage >= 100 ) {
+					$completed{$queryID} = 1;
+				} elsif ( $status->percentage < 100 ) {
+					print "Current percentage: ", $status->percentage, "\n" if $opt_v;
+					sleep(20);
+				} else {
+					die "ERROR:  analysis event block not well formed.\n";
+				}
+
+			} elsif ( $status->type == LSAE_STATE_CHANGED_EVENT ) {
+				if (    ( $status->new_state =~ m"completed"i )
+					 || ( $status->new_state =~ m"terminated_by_request"i )
+					 || ( $status->new_state =~ m"terminated_by_error"i ) )
+				{
+					$completed{$queryID} = 1;
+				} elsif (    ( $status->new_state =~ m"created"i )
+						  || ( $status->new_state =~ m"running"i ) )
+				{
+					print "Current State: ", $status->new_state, "\n" if $opt_v;
+					sleep(20);
+				} else {
+					die "ERROR:  analysis event block not well formed.\n";
+				}
+
+			} elsif ( $status->type == LSAE_STEP_PROGRESS_EVENT ) {
+				if ( $status->steps_completed >= $status->total_steps ) {
+					$completed{$queryID} = 1;
+				} elsif ( $status->steps_completed < $status->total_steps ) {
+					print "Steps completed: ", $status->steps_completed, "\n" if $opt_v;
+					sleep(20);
+				} else {
+					die "ERROR:  analysis event block not well formed.\n";
+				}
+
+			} elsif ( $status->type == LSAE_TIME_PROGRESS_EVENT ) {
+				if ( $status->remaining == 0 ) {
+					$completed{$queryID} = 1;
+				} elsif ( $status->remaining > 0 ) {
+					print "Time remaining: ", $status->remaining, "\n" if $opt_v;
+					sleep(20);
+				} else {
+					die "ERROR:  analysis event block not well formed.\n";
+				}
+			}
+		}
+		last if scalar keys(%completed) == $#query_ids + 1;
+	}
+
+	foreach my $queryID (@query_ids) {
+		# get the result
+		my $searchTerm .=
+"<wsrp:ResourceProperty xmlns:wsrp='$WSRF::Constants::WSRP' xmlns:mobyws='$WSRF::Constants::MOBY'>";
+		$searchTerm .= "mobyws:result_" . $queryID;
+		$searchTerm .= "</wsrp:ResourceProperty>";
+		my $ans = WSRF::Lite->uri($WSRF::Constants::WSRP)->on_action(
+			sub {
+				sprintf '%s/%s/%sRequest', $WSRF::Constants::WSRPW, $_[1],
+				  $_[1];
+			}
+		  )->wsaddress($EPR)
+		  ->GetMultipleResourceProperties(
+								  SOAP::Data->value($searchTerm)->type('xml') );
+		die "ERROR:  " . $ans->faultstring if ( $ans->fault );
+
+		my $parser = XML::LibXML->new();
+		my $xml    = $ans->raw_xml;
+		my $doc = $parser->parse_string($xml);
+		$soap = $doc->getDocumentElement();
+		my $prop_name = "result_" . $queryID;
+		my ($prop) =
+		     $soap->getElementsByTagNameNS( $WSRF::Constants::MOBY, $prop_name )
+		  || $soap->getElementsByTagName($prop_name);
+		my $result = $prop->getFirstChild->toString
+		  unless ref $prop eq "XML::LibXML::NodeList";
+		$result = $prop->pop()->getFirstChild->toString
+		  if ref $prop eq "XML::LibXML::NodeList";
+		print $result;
+	}
+
+	# destroy the result
+	my $ans = WSRF::Lite->uri($WSRF::Constants::WSRL)->on_action(
+		sub {
+			sprintf '%s/ImmediateResourceTermination/%sRequest',
+			  $WSRF::Constants::WSRLW, $_[1];
+		}
+	)->wsaddress($EPR)->Destroy();
+
 } else {
-    # calling a local service module, without SOAP
-    my $data;
-    if (@ARGV > 0) {
-	$data = shift;     # a file name
-    } else {
-	use File::Temp qw( tempfile );
-	my $fh;
-	($fh, $data) = tempfile (UNLINK => 1);
-	print $fh _empty_input();
-	close $fh;
-    }
-    eval "require $module" or croak $@;
-    eval {
-	my $target = new $module;
-	print $target->$service ($data), "\n";
-    } or croak $@;
+
+	# calling a local service module, without SOAP
+	my $data;
+	if ( @ARGV > 0 ) {
+		$data = shift;    # a file name
+	} else {
+		use File::Temp qw( tempfile );
+		my $fh;
+		( $fh, $data ) = tempfile( UNLINK => 1 );
+		print $fh _empty_input();
+		close $fh;
+	}
+	eval "require $module" or croak $@;
+	eval {
+		my $target = new $module;
+		print $target->$service($data), "\n";
+	} or croak $@;
 }
 
 __END__

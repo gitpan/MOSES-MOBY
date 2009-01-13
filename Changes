@@ -1,6 +1,30 @@
 Revision history for Perl extension MOSES::MOBY.
 
-.85 Fri May 9 7:52:35 2008
+.87 
+	- fixed a string append bug where '+' was used
+	  instead of '.'
+	- added support for Asynchronous moby services
+	  * added async option to moses-generate-services.pl
+	  * added async option to moses-testing-service.pl
+	  * created an async dispatcher template
+	    AsyncMobyServer.cgi in the shared folder
+	  * created an async template skeleton module
+	    for async modules.
+	  * added another service table for async services  
+	- added a missing use statement for DateTime in Base.pm
+	- swapped IO::Scalar with IO::String (for performance
+	  reasons)
+	- applied patch to Utils.pm (thanks to Kenny Billiau).
+	  patch caches file paths once found instead of looking
+	  repeatedly for them.
+	- MOSES::MOBY::Cache::Registries::init used to do a file
+	  read each time a new Registries object was instantiated.
+	  Not the case anymore.
+	- fixed bug: 
+	    Services that consume/output primitives didn't have the
+	    proper 'use' statements. 
+
+.86 Sun May 11 
 	- fixed a bug in one of the test cases.
 	
 .85 Fri May 9 7:52:35 2008

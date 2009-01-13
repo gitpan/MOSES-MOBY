@@ -50,7 +50,68 @@
        ),
        [%- END %]
     [%- END -%]
+    
+    [%- MACRO get_use_statements (inputs, outputs) BLOCK %]
+    	[%- SET use_statements = [] -%]
+    	[%- FOREACH input IN inputs -%]
+			[%- IF NOT is_simple (input) -%]
+			    [%- found = 0 -%]
+			    [%- FOREACH e IN use_statements -%]
+			    	[%- SET found = 1 IF e == input.elements.0.datatype.name -%]
+			    [%- END -%]
+				[%- IF NOT found %]
+					[%- use_statements.push (input.elements.0.datatype.name) -%]
+					[%- get_use_statement(input.elements.0.datatype.name) -%]
+				[%- END -%]
+			[%- ELSE -%]
+				[%- found = 0 -%]
+			    [%- FOREACH e IN use_statements -%]
+			    	[%- SET found = 1 IF e == input.datatype.name -%]
+			    [%- END -%]
+				[%- IF NOT found %]
+					[%- use_statements.push (input.datatype.name) -%]
+					[%- get_use_statement(input.datatype.name) -%]
+				[%- END -%]
+			[%- END -%]
+		[%- END -%]
+		[%- FOREACH output IN outputs -%]
+			[%- IF NOT is_simple (output) -%]
+			    [%- found = 0 -%]
+			    [%- FOREACH e IN use_statements -%]
+			    	[%- SET found = 1 IF e == output.elements.0.datatype.name -%]
+			    [%- END -%]
+				[%- IF NOT found %]
+					[%- use_statements.push (output.elements.0.datatype.name) -%]
+					[%- get_use_statement(output.elements.0.datatype.name) -%]
+				[%- END -%]
+			[%- ELSE -%]
+				[%- found = 0 -%]
+			    [%- FOREACH e IN use_statements -%]
+			    	[%- SET found = 1 IF e == output.datatype.name -%]
+			    [%- END -%]
+				[%- IF NOT found %]
+					[%- use_statements.push (output.datatype.name) -%]
+					[%- get_use_statement(output.datatype.name) -%]
+				[%- END -%]
+			[%- END -%]
+		[%- END -%]
+    [%- END -%]
+    
+    [%- MACRO get_use_statement(datatype) BLOCK %]
+    	[%- IF datatype    == 'String'   %]use MOSES::MOBY::Data::String;
 
+		[%- ELSIF datatype == 'Integer'  %]use MOSES::MOBY::Data::Integer;
+
+		[%- ELSIF datatype == 'Float'    %]use MOSES::MOBY::Data::Float;
+
+		[%- ELSIF datatype == 'Boolean'  %]use MOSES::MOBY::Data::Boolean;
+
+		[%- ELSIF datatype == 'DateTime' %]use MOSES::MOBY::Data::DateTime;
+
+		[%- END -%]
+	[%- END -%]
+    
+    
     [%- MACRO no_children (datatype, value) BLOCK %]
        [%- IF datatype    == 'String'   %]value => "this is a value [% value %]",   # TO BE EDITED
        [%- ELSIF datatype == 'Integer'  %]value => 42,   # TO BE EDITED
@@ -142,6 +203,9 @@ use vars qw( @ISA );
 use MOSES::MOBY::Package;
 use MOSES::MOBY::ServiceException;
 use strict;
+
+[%# here we output use statements for our primitives %]
+[%- get_use_statements(base.inputs, base.outputs) -%]
 
 my %valid_namespaces = ( [% FOREACH ns IN input_ns %] '[%ns%]'=>1,  [% END %]);
 #-----------------------------------------------------------------

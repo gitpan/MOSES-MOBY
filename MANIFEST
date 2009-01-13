@@ -44,6 +44,7 @@ lib/MOSES/MOBY/Def/ServiceType.pm
 lib/MOSES/MOBY/Generators/GenServices.pm
 lib/MOSES/MOBY/Generators/GenTypes.pm
 lib/MOSES/MOBY/Generators/templates/datatype.tt
+lib/MOSES/MOBY/Generators/templates/service-async.tt
 lib/MOSES/MOBY/Generators/templates/service-base.tt
 lib/MOSES/MOBY/Generators/templates/service-cgi.tt
 lib/MOSES/MOBY/Generators/templates/service.tt
@@ -60,11 +61,13 @@ README
 share/log4perl.properties.template
 share/mabuhay.file
 share/moby-services.cfg.template
+share/AsyncMobyServer.cgi.template
 share/MobyServer.cgi.template
 share/notes
 share/samples/Service/HelloBiomobyWorld.pm
 share/samples/Service/Mabuhay.pm
 share/samples/SERVICES_TABLE
+share/samples/ASYNC_SERVICE_TABLE
 share/USER_REGISTRIES
 t/MOSES-MOBY-Cache.t
 t/MOSES-MOBY-Registry.t

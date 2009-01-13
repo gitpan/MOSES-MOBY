@@ -7,7 +7,7 @@ use warnings;
 
 use vars qw{$VERSION @ISA @EXPORT @EXPORT_OK};
 BEGIN {
-	$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
+	$VERSION = sprintf "%d.%02d", q$Revision: 1.6 $ =~ /: (\d+)\.(\d+)/;
 	@ISA       = qw{ Exporter };
 	@EXPORT    = qw{};
 	@EXPORT_OK = qw{};
@@ -117,6 +117,22 @@ own responsibility to do rather good than bad things) Perl Moses differs
 slightly from its Java brother - mainly by not insisting to create all necessary 
 objects in advance but building them on-the-fly.
 
+=head2 New Features
+
+Some of the new features included in this release are:
+
+=over 4
+
+=item * Support for CGI based moby services
+
+=item * Support for Asynchronous based moby services
+
+=item * Service developers can now enable the validation of namespaces
+
+=back 
+
+=cut
+
 =head2 Overview
 
 Perl Moses is a generator of Perl code - but this code does not need to be always stored in files, it can be generated on-the-fly every time a service is called. Also, there are up to four things to be generated: objects representing BioMoby data types, classes establishing bases for services, empty (but working) service implementation modules, and cgi-bin scripts, the entry points to BioMoby services.
@@ -182,6 +198,8 @@ sudo ln -s /home/senger/Perl-MoSeS/MobyServer.cgi .
 on windows, you can mimic the L<above|"How can I tell apache to execute MobyServer.cgi on Windows without moving the file to cgi-bin?">
 
 If you cannot create Symbolic links, or apache is not allowed to follow them, try this L<workaround|"Cannot Create Symbolic links">
+
+If you plan on developing asynchronous moby services, then don't forget to also create a symbolic link for B<AsyncMobyServer.cgi> as well!
 
 =item 5. Last but not least: call your service. 
 
@@ -321,6 +339,9 @@ The other modules needed are (all available from the CPAN):
 =item *
     IO::Prompt - try to install version 0.99.2 and not 0.99.4
 
+=item *
+    WSRF::Lite - for developing asynchronous moby services I<Optional>
+
 =back
 
 =cut
@@ -423,6 +444,12 @@ All these things can be done manually, at any time. Installation script just mak
 	installation. This is a cgi-bin script that will be started by
 	your web server when a BioMoby request comes. More about it in
 	deploying.
+	
+	* It creates a Perl-MoSeS/AsyncMobyServer.cgi file from a distributed
+	template, and updates their locations to reflect your local
+	installation. This is a cgi-bin script that will be started by
+	your web server when an asynchronous BioMoby request comes. More 
+	about it in	deploying.
 
     * For Perl Moses, the most important configuration option is the location
 	of your local cache (a place where a BioMoby registered entities are mirrored).
@@ -876,8 +903,10 @@ With options, you can generated other Perl Moses pieces:
    do it again in the run-time - therefore, the service implementation 
    is generated slightly differently - with an option "use the base, 
    rather than load the base" enabled.<p/>
-   Option <strong>-c</strong> generates both a <a href="#perl_modules_representing_bases_of_service_implementations">service base</a> 
+   Option <strong>-c</strong> generates both a <a href="#perl_modules_representing_bases_of_service_implementations">service implementation</a> 
      as well as a CGI dispatcher script.<p/>
+   Option <strong>-A</strong> generates both a <a href="#perl_modules_representing_bases_of_service_implementations">service implementation</a> 
+     as well as an asynchronous module (and it updates the dispatcher table, as well).<p/>
    Option <strong>-u</strong> updates the service cache.<p/>
    Option <strong>-f</strong> fills the service cache.<p/>
    Option <strong>-R</strong> allows you to specify a registry endpoint.
@@ -1373,6 +1402,8 @@ outdir = /home/senger/Perl-MoSeS/generated
 impl.outdir = /home/senger/Perl-MoSeS/services
 impl.package.prefix = Service
 impl.services.table = SERVICES_TABLE
+impl.async.services.table = ASYNC_SERVICES_TABLE
+&nbsp;
 #ignore.existing.types = true
 &nbsp;
 [log]
@@ -1408,7 +1439,9 @@ B<generators.impl.outdir> - Directory where to generate service implementations.
 
 B<generators.impl.package.prefix> - A beginning of the package name of the generated service implementations. Default is 'Service'. For example, a service Mabuhay will be represented by a Perl module I<Service::Mabuhay>. 
 
-B<generators.impl.services.table> - A name (without any path) of a file with a services dispatch table. Default is 'SERVICES_TABLE'. 
+B<generators.impl.services.table> - A name (without any path) of a file with a services dispatch table. Default is 'SERVICES_TABLE'.
+
+B<generators.impl.async.services.table> - A name (without any path) of a file with an async services dispatch table. Default is 'ASYNC_SERVICES_TABLE'. 
 
 B<generators.ignore.existing.types> - A boolean property. If set to true ('true', 1, ' '+', 'yes', or 'ano') the data types generator will not check if a wanted data type module already exists on a disk but always generates into memory a new one. Default value is 'false' (meaning that the generator tries to use whatever already exists).
 
@@ -1661,16 +1694,16 @@ In order to deploy a Perl Moses BioMoby service, you need:
 its cgi-bin scripts are located (e.g. <tt>/usr/lib/cgi-bin</tt>). You
 may configure your Web Server to allow to have other cgi-bin script
 elsewhere, or to link them by symbolic links. An example how to create
-a symbolic link is in <a href="#installation">installation</a>.
+a symbolic link is in <a href="#4._Make_your_service_available_from_your_Web_Server_(this_is_called_deploying).">5 steps to your first service</a>.
 
   </li><li> Then you need the cgi-bin script itself. Its name does not
 matter (except that it will become a part of your services
-endpoint). The Perl Moses installation script creates a script named
-<tt>MobyServer.cgi</tt> in <tt>/Perl-MoSeS</tt> directory.
-Notice that it contains some hard-coded paths - that comes from the
-installation time. Feel free to change them manually, or remove the
-file and run <tt>install.pl</tt> again to re-create it. Here is the
-whole script:
+endpoint). The Perl Moses installation script creates two scripts named
+<tt>MobyServer.cgi</tt> and <tt>AsyncMobyServer.cgi</tt> in 
+<tt>/Perl-MoSeS</tt> directory. Notice that it contains some hard-coded
+paths - that comes from the installation time. Feel free to change them
+manually, or remove the file and run <tt>install.pl</tt> again to 
+re-create it. Here is the whole script (for MobyServer.cgi):
 </li>
 </ul>
 <pre>
@@ -1697,7 +1730,7 @@ whole script:
 
 You see above that the script "requires" SERVICES_TABLE file (its name was taken during installation form the configuration). This is a dispatch table with a list of all BioMoby services served by this script. Yes, one cgi-bin script can serve more services - meaning that more services are registered with the same endpoint (and they are distinguished by their service names - which is, surprisingly, not part of the endpoint; but that's the way how Perl does it). 
 
-These three things (a Web Server knowing about your cgi-bin script, a cgi-bin script knowing about Perl Moses code, and a dispatch table knowing what services to serve) are all you need to have your service deployed. 
+These three things (a Web Server knowing about your cgi-bin scripts, a cgi-bin script knowing about Perl Moses code, and a dispatch table knowing what services to serve) are all you need to have your service deployed. 
 
 =cut
 
@@ -1992,9 +2025,7 @@ E<nbsp>E<nbsp>E<nbsp>E<nbsp>* (N) Documentation of the Perl Modules is unfinishe
 
 E<nbsp>E<nbsp>E<nbsp>E<nbsp>* (N) The generated service implementation could have a better Perl documentation, listing all available methods for inputs and outputs (the methods are already shown in the code, but having them also in the POD would help).
 
-E<nbsp>E<nbsp>E<nbsp>E<nbsp>* (F) The service bases could have option to validate namespaces - as it is now in CommonSubs.pm.
-
-I will try to keep up-to-date the list of the recent changes in the ChangeLog L<http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Java/docs/Perl-ChangeLog>. 
+I will try to keep up-to-date the list of the recent changes in the Changes file included with the distribution. 
 
 =cut
 

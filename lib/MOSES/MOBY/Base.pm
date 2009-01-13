@@ -3,12 +3,15 @@
 # Author: Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Base.pm,v 1.4 2008/04/29 19:43:18 kawas Exp $
+# $Id: Base.pm,v 1.6 2008/11/06 18:32:33 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Base;
 
 use strict;
+
+use HTTP::Date;
+
 use vars qw( $VERSION $Revision $AUTOLOAD @EXPORT @ISA );
 use vars qw( $LOG $LOGGER_NAME $CONFIG_NAMESPACE );
 
@@ -31,8 +34,8 @@ BEGIN {
     @ISA = qw( Exporter );
     @EXPORT = qw( $LOG );
 
-    $VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
-    $Revision  = '$Id: Base.pm,v 1.4 2008/04/29 19:43:18 kawas Exp $';
+    $VERSION = sprintf "%d.%02d", q$Revision: 1.6 $ =~ /: (\d+)\.(\d+)/;
+    $Revision  = '$Id: Base.pm,v 1.6 2008/11/06 18:32:33 kawas Exp $';
 
     # initiate error handling
     require Carp; import Carp qw( confess );
@@ -629,14 +632,14 @@ sub create_member {
 my $DUMPER;
 BEGIN {
     use Dumpvalue;
-    use IO::Scalar;
+    use IO::String;
     $DUMPER = Dumpvalue->new();
 #    $DUMPER->set (veryCompact => 1);
 }
 sub as_string {
     my $self = shift;
     my $dump_str;
-    my $io = IO::Scalar->new (\$dump_str);
+    my $io = IO::String->new (\$dump_str);
     my $oio = select ($io);
     $DUMPER->dumpValue (\$self);
     select ($oio);

@@ -3,7 +3,7 @@
 # Author: Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Registries.pm,v 1.4 2008/04/29 19:29:54 kawas Exp $
+# $Id: Registries.pm,v 1.5 2008/11/06 18:32:33 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Cache::Registries;
@@ -13,146 +13,176 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
 
-#-----------------------------------------------------------------
-# A hard-coded list of the known registries.
-#
-# Please fill all details if you are adding new registry here.
-#
-# Do not create synonyms starting with 'http://' (they are in the
-# roles of the hash keys) - this is how some methods distinguish
-# between synonym and endpoint.
-#
-#-----------------------------------------------------------------
+use vars qw/ %REGISTRIES /;
 
-my %REGISTRIES =
-    ( iCAPTURE => { endpoint  => 'http://moby.ucalgary.ca/moby/MOBY-Central.pl',
-		    namespace => 'http://moby.ucalgary.ca/MOBY/Central',
-		    name      => 'Sun Centre of Excellence, Calgary',
-		    contact   => 'Edward Kawas (edward.kawas@gmail.com)',
-		    public    => 'yes',
-		    text      => 'A curated public registry hosted at U of C, Calgary',
-		},
-      IRRI     => { endpoint  => 'http://cropwiki.irri.org/cgi-bin/MOBY-Central.pl',
-		    namespace => 'http://cropwiki.irri.org/MOBY/Central',
-		    name      => 'IRRI, Philippines',
-		    contact   => 'Mylah Rystie Anacleto (m.anacleto@cgiar.org)',
-		    public    => 'yes',
-		    text      => 'The MOBY registry at the International Rice Research Institute (IRRI) is intended mostly for Generation Challenge Program (GCP) developers. It allows the registration of experimental moby entities within GCP.',
-	       },
-      testing  => { endpoint  => 'http://bioinfo.icapture.ubc.ca/cgi-bin/mobycentral/MOBY-Central.pl',
-		    namespace => 'http://bioinfo.icapture.ubc.ca/MOBY/Central',
-		    name      => 'Testing BioMoby registry',
-		    contact   => 'Edward Kawas (edward.kawas@gmail.com)',
-		    public    => 'yes',
-		},
-      );
+BEGIN {
+	our (%REGISTRIES);
+	my $already_init = 0;
 
-$REGISTRIES{default} = $REGISTRIES{iCAPTURE};
+	sub is_init {
+		return $already_init++;
+	}
+
+	sub init_reg {
+		#-----------------------------------------------------------------
+		# A hard-coded list of the known registries.
+		#
+		# Please fill all details if you are adding new registry here.
+		#
+		# Do not create synonyms starting with 'http://' (they are in the
+		# roles of the hash keys) - this is how some methods distinguish
+		# between synonym and endpoint.
+		#
+		#-----------------------------------------------------------------
+		%REGISTRIES = (
+			iCAPTURE => {
+				  endpoint  => 'http://moby.ucalgary.ca/moby/MOBY-Central.pl',
+				  namespace => 'http://moby.ucalgary.ca/MOBY/Central',
+				  name      => 'Sun Centre of Excellence, Calgary',
+				  contact   => 'Edward Kawas (edward.kawas@gmail.com)',
+				  public    => 'yes',
+				  text      => 'A curated public registry hosted at U of C, Calgary',
+			},
+			IRRI => {
+				endpoint  => 'http://cropwiki.irri.org/cgi-bin/MOBY-Central.pl',
+				namespace => 'http://cropwiki.irri.org/MOBY/Central',
+				name      => 'IRRI, Philippines',
+				contact   => 'Mylah Rystie Anacleto (m.anacleto@cgiar.org)',
+				public    => 'yes',
+				text      => 'The MOBY registry at the International Rice Research Institute (IRRI) is intended mostly for Generation Challenge Program (GCP) developers. It allows the registration of experimental moby entities within GCP.',
+			},
+			testing => {
+				endpoint  => 'http://bioinfo.icapture.ubc.ca/cgi-bin/mobycentral/MOBY-Central.pl',
+				namespace => 'http://bioinfo.icapture.ubc.ca/MOBY/Central',
+				name      => 'Testing BioMoby registry',
+				contact   => 'Edward Kawas (edward.kawas@gmail.com)',
+				public    => 'yes',
+			},
+		);
+
+		# create a default registry
+		$REGISTRIES{default} = $REGISTRIES{iCAPTURE};
+
+		# read from config file user registries
+		# add user_registries
+		eval {
+			do {
+
+				# is this the best way?
+				use lib $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR
+				  || "/make/believe";
+				use vars qw( %USER_REGISTRIES );
+				require $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME
+				  if defined $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME;
+				foreach my $key ( sort keys %USER_REGISTRIES ) {
+
+					# script if key exists
+					next if exists $REGISTRIES{$key};
+					$REGISTRIES{$key} = $USER_REGISTRIES{$key};
+				}
+			  }
+		};
+		unshift @INC, "/make/believe" if $@;
+	}
+}
 
 #-----------------------------------------------------------------
 # init
 #-----------------------------------------------------------------
 sub init {
-    my $self = shift;
-    my %cloned = %REGISTRIES;
-	# add user_registries
-	eval {
-		do {
-			# is this the best way?
-			use lib $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR || "/make/believe";
-			use vars qw( %USER_REGISTRIES );
-			require $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME 
-				if defined $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME;
-				foreach my $key (sort keys %USER_REGISTRIES) {
-					# script if key exists
-					next if exists $cloned{$key};
-					$cloned{$key} = $USER_REGISTRIES{$key}
-				}
-			}
-	};
-	unshift @INC, "/make/believe" if $@;
-    $self->{registries} = \%cloned;
+	my $self   = shift;
+	init_reg() unless is_init(); 
+	my %cloned = %REGISTRIES;
+	$self->{registries} = \%cloned;
 }
 
 #-----------------------------------------------------------------
 # list
 #-----------------------------------------------------------------
 sub list {
-    my $self = shift;
-    return sort keys %{ $self->{registries} } if ref $self;
+	my $self = shift;
+	return sort keys %{ $self->{registries} } if ref $self;
+
 	# do this so that we can get user defined registries
-    return MOSES::MOBY::Cache::Registries->new()->list();
+	return MOSES::MOBY::Cache::Registries->new()->list();
 }
 
 #-----------------------------------------------------------------
 # get
 #-----------------------------------------------------------------
 sub get {
-    my ($self, $abbrev) = @_;
-    $abbrev ||= 'default';
-    return $self->{registries}->{$abbrev} if ref $self;
+	my ( $self, $abbrev ) = @_;
+	$abbrev ||= 'default';
+	return $self->{registries}->{$abbrev} if ref $self;
+
 	# do this so that we can get user defined registries
-    return MOSES::MOBY::Cache::Registries->new()->get($abbrev);
+	return MOSES::MOBY::Cache::Registries->new()->get($abbrev);
 }
 
 #-----------------------------------------------------------------
 # all
 #-----------------------------------------------------------------
 sub all {
-    my $self = shift;
-    return $self->{registries} if ref $self;
+	my $self = shift;
+	return $self->{registries} if ref $self;
+
 	# do this so that we can get user defined registries
-    return MOSES::MOBY::Cache::Registries->new()->all;
+	return MOSES::MOBY::Cache::Registries->new()->all;
 }
 
 #-----------------------------------------------------------------
 # add
 #-----------------------------------------------------------------
 sub add {
-   my ($self, %reg) = @_;
+	my ( $self, %reg ) = @_;
 
 	# add using object methods ...
-    return MOSES::MOBY::Cache::Registries->new()->add(%reg) unless ref $self;
-    
+	return MOSES::MOBY::Cache::Registries->new()->add(%reg) unless ref $self;
+
 	# check for force
 	my $force = exists $reg{force};
-	
+
 	# check %reg hash for conformance and existance
 	return -1
-		unless defined $reg{namespace} and defined $reg{endpoint}
-			and defined $reg{synonym} and defined $reg{text} 
-			and defined $reg{name} and defined $reg{contact} 
-			and defined $reg{public};
-	
+	  unless defined $reg{namespace}
+		  and defined $reg{endpoint}
+		  and defined $reg{synonym}
+		  and defined $reg{text}
+		  and defined $reg{name}
+		  and defined $reg{contact}
+		  and defined $reg{public};
+
 	$reg{public} = 'yes'
-		unless $reg{public} eq 'yes' || $reg{public} eq 'no';
-	
+	  unless $reg{public} eq 'yes' || $reg{public} eq 'no';
+
 	return -1
-		if $reg{synonym} =~ m"^http://";
-	
+	  if $reg{synonym} =~ m"^http://";
+
 	return -2
-		unless ((not defined $self->{registries}->{$reg{synonym}}) or $force);
-	
+	  unless ( ( not defined $self->{registries}->{ $reg{synonym} } )
+			   or $force );
+
 	# call update ...
 	do {
-		eval {
-			$self->_update_user_registries(%reg);
-		};
-		$LOG->warn ("Error updating user registries: $@")
-			if ($LOG->is_warn) and $@;
-		# return 0 if $@; # removed because we should be able to 
-		
+		eval { $self->_update_user_registries(%reg); };
+		$LOG->warn("Error updating user registries: $@")
+		  if ( $LOG->is_warn )
+		  and $@;
+
+		# return 0 if $@; # removed because we should be able to
+
 		#update $self->{registries}
-		$self->{registries}->{$reg{synonym}} = {
-	                endpoint  => $reg{endpoint},
-    	            namespace => $reg{namespace},
-        	        name      => $reg{name},
-            	    contact   => $reg{contact},
-					public    => $reg{public},
-					text      => $reg{text},
+		$self->{registries}->{ $reg{synonym} } = {
+												   endpoint  => $reg{endpoint},
+												   namespace => $reg{namespace},
+												   name      => $reg{name},
+												   contact   => $reg{contact},
+												   public    => $reg{public},
+												   text      => $reg{text},
 		};
+
 		# return success
 		return 0 if $@;
 		return 1;
@@ -163,120 +193,150 @@ sub add {
 # remove
 #-----------------------------------------------------------------
 sub remove {
-   my ($self, $name) = @_;
+	my ( $self, $name ) = @_;
 
 	# add using object methods ...
-    return MOSES::MOBY::Cache::Registries->new()->remove($name) unless ref $self;
-    return 1 unless defined $self->{registries}->{$name};
+	return MOSES::MOBY::Cache::Registries->new()->remove($name)
+	  unless ref $self;
+	return 1 unless defined $self->{registries}->{$name};
+
 	# do the remove
 	do {
 		eval {
-			# remove from file
-			 my %args =
-				( # some default values
-				  user_reg_dir    => ( $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR || '' ),
-				  user_reg_table => ($MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME || 'USER_REGISTRIES'),
-				  );
-				die "Couldn't find the location to 'USER_REGISTRIES' in the configuration file!"
-					if $args{user_reg_dir} eq '';
 
-				# read the current user registry table
-				unshift (@INC, $args{user_reg_dir});   # place where USER_REGISTRIES could be
-				use vars qw ( %USER_REGISTRIES );
-				eval { require $args{user_reg_table} };
-				my $file_with_table;
-				if ($@) {
-				$LOG->warn ("Cannot find table of USER_REGISTRIES '" . $args{user_reg_table} . "': $@");
-				$file_with_table = File::Spec->catfile ($args{user_reg_dir}, $args{user_reg_table});
-				} else {
+			# remove from file
+			my %args = (    # some default values
+				user_reg_dir =>
+				  ( $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR || '' ),
+				user_reg_table => (
+							  $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME
+								|| 'USER_REGISTRIES'
+				),
+			);
+			die
+"Couldn't find the location to 'USER_REGISTRIES' in the configuration file!"
+			  if $args{user_reg_dir} eq '';
+
+			# read the current user registry table
+			unshift( @INC, $args{user_reg_dir} )
+			  ;    # place where USER_REGISTRIES could be
+			use vars qw ( %USER_REGISTRIES );
+			eval { require $args{user_reg_table} };
+			my $file_with_table;
+			if ($@) {
+				$LOG->warn(   "Cannot find table of USER_REGISTRIES '"
+							. $args{user_reg_table}
+							. "': $@" );
+				$file_with_table = File::Spec->catfile( $args{user_reg_dir},
+														$args{user_reg_table} );
+			} else {
 				$file_with_table = $INC{ $args{user_reg_table} };
-				}
-			
-				# remove from user regs table
-				delete $USER_REGISTRIES{$name};
-				# ...and write it back to a disk
-				require Data::Dumper;
-				open DISPATCH, ">$file_with_table"
-				or $self->throw ("Cannot open for writing '$file_with_table': $!\n");
-				print DISPATCH Data::Dumper->Dump ( [\%USER_REGISTRIES], ['*USER_REGISTRIES'] )
-				or $self->throw ("cannot write to '$file_with_table': $!\n");
-				close DISPATCH;
-				$LOG->info ("\nUpdated user reg table '$file_with_table'. New contents:\n" .
-					$self->toString (\%USER_REGISTRIES));
+			}
+
+			# remove from user regs table
+			delete $USER_REGISTRIES{$name};
+
+			# ...and write it back to a disk
+			require Data::Dumper;
+			open DISPATCH, ">$file_with_table"
+			  or
+			  $self->throw("Cannot open for writing '$file_with_table': $!\n");
+			print DISPATCH Data::Dumper->Dump( [ \%USER_REGISTRIES ],
+											   ['*USER_REGISTRIES'] )
+			  or $self->throw("cannot write to '$file_with_table': $!\n");
+			close DISPATCH;
+			$LOG->info(
+				  "\nUpdated user reg table '$file_with_table'. New contents:\n"
+					. $self->toString( \%USER_REGISTRIES ) );
 		};
-		$LOG->warn ("Error removing user registries: $@")
-			if ($LOG->is_warn) and $@;
-				
+		$LOG->warn("Error removing user registries: $@")
+		  if ( $LOG->is_warn )
+		  and $@;
+
 		#update $self->{registries}
 		delete $self->{registries}->{$name};
+
 		# could remove from persistent store
 		return 0 if $@;
+
 		# return success
 		return 1;
 	} if ref $self;
 }
-
 
 #-----------------------------------------------------------------
 # _update_user_registries
 #-----------------------------------------------------------------
 
 sub _update_user_registries {
-    my ($self, @args) = @_;
-    my %args =
-	( # some default values
-	  user_reg_dir    => ( $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR || '' ),
-	  user_reg_table => ($MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME || 'USER_REGISTRIES'),
+	my ( $self, @args ) = @_;
+	my %args = (    # some default values
+		user_reg_dir => ( $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR || '' ),
+		user_reg_table => (
+							$MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_FILENAME
+							  || 'USER_REGISTRIES'
+		),
 
-	  # and the real parameters
-	  @args );
-    die "Couldn't find the location to 'USER_REGISTRIES' in the configuration file!"
-		if $args{user_reg_dir} eq '';
-		
-	# check %args for the right parameters, endpoint, namespace, name, synonym, contact, text, public
+		# and the real parameters
+		@args
+	);
+	die
+"Couldn't find the location to 'USER_REGISTRIES' in the configuration file!"
+	  if $args{user_reg_dir} eq '';
+
+# check %args for the right parameters, endpoint, namespace, name, synonym, contact, text, public
 	die "Arguments to update user registries are incomplete."
-		unless  defined $args{namespace} and defined $args{endpoint}
-			and defined $args{synonym} and defined $args{text} 
-			and defined $args{name} and defined $args{contact} 
-			and defined $args{public};
-	
+	  unless defined $args{namespace}
+		  and defined $args{endpoint}
+		  and defined $args{synonym}
+		  and defined $args{text}
+		  and defined $args{name}
+		  and defined $args{contact}
+		  and defined $args{public};
+
 	die "Registry synonyms should not start with http ..."
-		if $args{synonym} =~ m"^http://";
-	
-    my $outdir = File::Spec->rel2abs ($args{user_reg_dir});
-    $LOG->debug ("Arguments for generating user registries table: " . $self->toString (\%args))
-	if ($LOG->is_debug);
+	  if $args{synonym} =~ m"^http://";
 
-    # read the current user registry table
-    unshift (@INC, $args{user_reg_dir});   # place where USER_REGISTRIES could be
-    use vars qw ( %USER_REGISTRIES );
-    eval { require $args{user_reg_table} };
-    my $file_with_table;
-    if ($@) {
-	$LOG->warn ("Cannot find table of USER_REGISTRIES '" . $args{user_reg_table} . "': $@");
-	$file_with_table = File::Spec->catfile ($args{user_reg_dir}, $args{user_reg_table});
-    } else {
-	$file_with_table = $INC{ $args{user_reg_table} };
-    }
+	my $outdir = File::Spec->rel2abs( $args{user_reg_dir} );
+	$LOG->debug( "Arguments for generating user registries table: "
+				 . $self->toString( \%args ) )
+	  if ( $LOG->is_debug );
 
-    # update user regs table
-	$USER_REGISTRIES{$args{synonym}} = {
-                                  endpoint  => $args{endpoint},
-                                  namespace => $args{namespace},
-                                  name      => $args{name},
-                                  contact   => $args{contact},
-                                  public    => $args{public},
-                                  text      => $args{text},
-								  };
-    # ...and write it back to a disk
-    require Data::Dumper;
-    open DISPATCH, ">$file_with_table"
-	or $self->throw ("Cannot open for writing '$file_with_table': $!\n");
-    print DISPATCH Data::Dumper->Dump ( [\%USER_REGISTRIES], ['*USER_REGISTRIES'] )
-	or $self->throw ("cannot write to '$file_with_table': $!\n");
-    close DISPATCH;
-    $LOG->info ("\nUpdated user reg table '$file_with_table'. New contents:\n" .
-		$self->toString (\%USER_REGISTRIES));
+	# read the current user registry table
+	unshift( @INC, $args{user_reg_dir} ); # place where USER_REGISTRIES could be
+	use vars qw ( %USER_REGISTRIES );
+	eval { require $args{user_reg_table} };
+	my $file_with_table;
+	if ($@) {
+		$LOG->warn(   "Cannot find table of USER_REGISTRIES '"
+					. $args{user_reg_table}
+					. "': $@" );
+		$file_with_table =
+		  File::Spec->catfile( $args{user_reg_dir}, $args{user_reg_table} );
+	} else {
+		$file_with_table = $INC{ $args{user_reg_table} };
+	}
+
+	# update user regs table
+	$USER_REGISTRIES{ $args{synonym} } = {
+										   endpoint  => $args{endpoint},
+										   namespace => $args{namespace},
+										   name      => $args{name},
+										   contact   => $args{contact},
+										   public    => $args{public},
+										   text      => $args{text},
+	};
+
+	# ...and write it back to a disk
+	require Data::Dumper;
+	open DISPATCH, ">$file_with_table"
+	  or $self->throw("Cannot open for writing '$file_with_table': $!\n");
+	print DISPATCH Data::Dumper->Dump( [ \%USER_REGISTRIES ],
+									   ['*USER_REGISTRIES'] )
+	  or $self->throw("cannot write to '$file_with_table': $!\n");
+	close DISPATCH;
+	$LOG->info( "\nUpdated user reg table '$file_with_table'. New contents:\n"
+				. $self->toString( \%USER_REGISTRIES ) );
 }
 
 1;

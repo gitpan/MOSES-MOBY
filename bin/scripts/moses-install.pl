@@ -2,7 +2,7 @@
 #
 # Prepare the stage...
 #
-# $Id: moses-install.pl,v 1.4 2008/04/29 19:59:43 kawas Exp $
+# $Id: moses-install.pl,v 1.5 2008/08/25 16:28:57 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
@@ -63,10 +63,19 @@ END_OF_USAGE
 			  IO::Scalar
 			  Unicode::String
 			  ) ) {
-	check_module ($module);
+		check_module ($module);
     }
+    # check for async libraries if user wants to ....
+    print STDOUT "Shall we check for the moby-async libraries\n\t(do this only if you plan on creating async moby services)? y/n [n]";
+    my $tmp = <STDIN>;
+    $tmp =~ s/\s//g; 
+    if ($tmp =~ /y/i) {
+    	check_module('MOBY::Client::Central');
+		check_module('WSRF::Lite'); 
+    }
+
     if (MSWIN) {
-	check_module ('Term::ReadLine');
+		check_module ('Term::ReadLine');
 	{
 	    local $^W = 0;
 	    $SimplePrompt::Terminal = Term::ReadLine->new ('Installation');
@@ -241,6 +250,8 @@ my $services_dir = $MOBYCFG::GENERATORS_IMPL_OUTDIR ||
     "$pmoses_home/services";
 my $services_table = $MOBYCFG::GENERATORS_IMPL_SERVICES_TABLE ||
     'SERVICES_TABLE';
+my $async_services_table = $MOBYCFG::GENERATORS_IMPL_SERVICES_TABLE ||
+    'ASYNC_SERVICES_TABLE';
 
 my $cgibin_file = "$pmoses_home/MobyServer.cgi";
 if (-e $cgibin_file and ! $opt_F) {
@@ -257,6 +268,24 @@ if (-e $cgibin_file and ! $opt_F) {
 	   '@SERVICES_TABLE@' => $services_table,
        } );
     chmod 0755, $cgibin_file;   # everybody can execute
+}
+
+# AsyncMobyServer.cgi file
+my $async_cgibin_file = "$pmoses_home/AsyncMobyServer.cgi";
+if (-e $async_cgibin_file and ! $opt_F) {
+    say "\nWeb Server file '$async_cgibin_file' exists.";
+    say "It will not be overwritten unless you start 'install.pl -F'.\n";
+} else {
+    file_from_template
+	($async_cgibin_file,
+	 File::ShareDir::dist_file('MOSES-MOBY','AsyncMobyServer.cgi.template'),
+	 'Web Server file',
+	 { '@PMOSES_HOME@'    => $pmoses_home,
+	   '@GENERATED_DIR@'  => $generated_dir,
+	   '@SERVICES_DIR@'   => $services_dir,
+	   '@ASYNC_SERVICE_TABLE@' => $async_services_table,
+       } );
+    chmod 0755, $async_cgibin_file;   # everybody can execute
 }
 
 # directory for local cache
@@ -316,6 +345,7 @@ if (-e $config_file and ! $opt_F) {
 	   '@GENERATED_DIR@'    		=> $generated_dir,
 	   '@SERVICES_DIR@'     		=> $services_dir,
 	   '@SERVICES_TABLE@'   		=> $services_table,
+	   '@ASYNC_SERVICES_TABLE@'   	=> $async_services_table,
 	   '@LOG4PERL_FILE@'    		=> $log4perl_file,
 	   '@LOGFILE@'          		=> $log_file1,
 	   '@USER_REGISTRIES_FILE_DIR@'	=> $pmoses_home,

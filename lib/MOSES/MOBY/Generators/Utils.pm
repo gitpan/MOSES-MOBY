@@ -4,7 +4,7 @@
 #         Edward Kawas <edward.kawas@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Utils.pm,v 1.4 2008/04/29 19:45:10 kawas Exp $
+# $Id: Utils.pm,v 1.5 2008/11/06 18:32:33 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Generators::Utils;
@@ -13,7 +13,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 
@@ -61,17 +61,29 @@ There are two or more arguments: C<$default_start> and C<@names>.
 
 =cut
 
+my %full_path_of = ();
+
 sub find_file {
     my ($self, $default_start, @names) = @_;
     my $fixed_part = File::Spec->catfile (@names);
+    return $full_path_of{ $fixed_part } if exists $full_path_of{ $fixed_part };
+
     my $result = File::Spec->catfile ($default_start, $fixed_part);
-    return $result if -e $result;
+    if (-e $result) {
+        $full_path_of{ $fixed_part } = $result;
+        return $result;
+    }
 
     foreach my $idx (0 .. $#INC) {
-	$result = File::Spec->catfile ($INC[$idx], $fixed_part);
-	return $result if -e $result;
+        $result = File::Spec->catfile ($INC[$idx], $fixed_part);
+        if (-e $result) {
+            $full_path_of{ $fixed_part } = $result;
+            return $result;
+        }
     }
-    return File::Spec->catfile ($default_start, $fixed_part);
+    $result = File::Spec->catfile ($default_start, $fixed_part);
+    $full_path_of{ $fixed_part } = $result;
+    return $result;
 }
 
 1;

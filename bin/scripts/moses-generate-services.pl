@@ -2,22 +2,22 @@
 #
 # Generate services.
 #
-# $Id: moses-generate-services.pl,v 1.5 2008/05/09 20:26:04 kawas Exp $
+# $Id: moses-generate-services.pl,v 1.6 2008/08/25 16:28:57 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
 # some command-line options
 use Getopt::Std;
-use vars qw/ $opt_h $opt_d $opt_R $opt_v $opt_a $opt_s $opt_b $opt_f $opt_u $opt_F $opt_S $opt_t $opt_c /;
-getopts('hdvasbfuFStcR:');
+use vars qw/ $opt_h $opt_A $opt_d $opt_R $opt_v $opt_a $opt_s $opt_b $opt_f $opt_u $opt_F $opt_S $opt_t $opt_c /;
+getopts('hdvasbfuFStcAR:');
 # usage
 if (not($opt_u or $opt_f)) {
 if ($opt_h or (not $opt_a and @ARGV == 0)) {
     print STDOUT <<'END_OF_USAGE';
 Generate Services.
-Usage: [-vds] [-R registry-string] [-b|S|t] authority [service-name] [service-name...]
-       [-vds] [-R registry-string] [-b|S|t] authority
-       [-vd] [-R registry-string] [-b|S|t] -a
+Usage: [-vds] [-R registry-string] [-b|S|t|c|A] authority [service-name] [service-name...]
+       [-vds] [-R registry-string] [-b|S|t|c|A] authority
+       [-vd] [-R registry-string] [-b|S|t|c|A] -a
        [-R registry-string] [-fu]
 
     It also needs to get a location of a local cache (and potentially
@@ -40,9 +40,10 @@ Usage: [-vds] [-R registry-string] [-b|S|t] authority [service-name] [service-na
            implementation module has enabled option to read the base
            statically (that is why it is also generated here)
     -i ... generate an implementation of the given service
-    -c ... generate a cgi based implementation of the given service       
+    -c ... generate a cgi based implementation of the given service
+    -A ... generate an asynchronous based implementation of the given service       
     -t ... update dispatch table of services (a table used by the
-	   cgi-bin script and SOAP::Lite to dispatch requests);
+	       cgi-bin script and SOAP::Lite to dispatch requests);
            this table is also updated automatically when options
            -i or -S are given
     If none of -b, -S, -t, -c is given, it generates/show implementation
@@ -119,6 +120,10 @@ if ($opt_a) {
 	$generator->generate_cgi;
     } elsif ($opt_t) {
 	$generator->update_table;
+    } elsif ($opt_A) {
+	$generator->generate_impl;
+	$generator->generate_async;
+	$generator->update_async_table;
     } else {
 	$generator->generate_impl;
 	$generator->update_table;
@@ -139,6 +144,11 @@ if ($opt_a) {
 		$generator->generate_cgi(service_names => [@ARGV],
 				       authority     => $authority,
 				       outcode       => \$code);
+    }elsif ($opt_A) {
+		$generator->generate_async(service_names => [@ARGV],
+					       authority     => $authority,
+					       outcode       => \$code);
+		#$generator->update_async_table;
     } else {
 	    $generator->generate_impl (service_names => [@ARGV],
 				       authority     => $authority,
@@ -158,7 +168,18 @@ if ($opt_a) {
 				       authority     => $authority);
 	    $generator->update_table (service_names => [@ARGV],
 				      authority     => $authority);
-	}  elsif ($opt_c) {
+	} elsif ($opt_A) {
+	    $generator->generate_impl(
+					service_names => [@ARGV],
+					authority     => $authority,
+					force_over    => $opt_F);
+	    $generator->generate_async (service_names => [@ARGV],
+				       authority     => $authority,
+				       force_over    => $opt_F,
+				       static_impl   => 1);
+	    $generator->update_async_table (service_names => [@ARGV],
+				      authority     => $authority);
+	} elsif ($opt_c) {
     	$generator->generate_impl(
 					service_names => [@ARGV],
 					authority     => $authority,

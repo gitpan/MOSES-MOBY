@@ -5,7 +5,7 @@
 #
 # For copyright and disclaimer see below.
 #
-# $Id: GenServices.pm,v 1.6 2008/05/10 00:23:05 kawas Exp $
+# $Id: GenServices.pm,v 1.7 2008/08/25 16:27:28 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Generators::GenServices;
@@ -23,7 +23,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.6 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.7 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # A list of allowed attribute names. See MOSES::MOBY::Base for details.
@@ -159,7 +159,7 @@ sub generate_impl {
 	  cachedir      => $self->cachedir,
 	  registry      => $self->registry,
 	  service_names => [],
-          force_over    => 0,
+      force_over    => 0,
 	  static_impl   => 0,
 
 	  # other args, with no default values
@@ -222,18 +222,17 @@ sub generate_impl {
 	};
 	my @input_ns = ();
         foreach my $in (@{ $obj->inputs }) {
-
-	    if (ref ($in) eq 'MOSES::MOBY::Def::PrimaryDataSimple') {
-                foreach my $ns ( @{$in->namespaces} ) {
-                    push @input_ns, $ns->name;
-                }
-            } else {
-                foreach my $sim (@{ $in->elements }) {
-                    foreach my $ns ( @{$sim->namespaces} ) {
-                        push @input_ns, $ns->name;
-                    }
-                }
-            }
+		    if (ref ($in) eq 'MOSES::MOBY::Def::PrimaryDataSimple') {
+	                foreach my $ns ( @{$in->namespaces} ) {
+	                    push @input_ns, $ns->name;
+	                }
+	        } else {
+	        	foreach my $sim (@{ $in->elements }) {
+	            	foreach my $ns ( @{$sim->namespaces} ) {
+	                	push @input_ns, $ns->name;
+					}
+				}
+			}
         }
 	if ($args{outcode}) {
 	    $tt->process ( $input, { base         => $obj,
@@ -278,7 +277,8 @@ sub generate_cgi {
     my ($self, @args) = @_;
     my %args =
 	( # some default values
-	  outdir        => $self->outdir . "/../cgi",
+	  outdir        => $MOBYCFG::GENERATORS_IMPL_OUTDIR ||
+			     	   MOSES::MOBY::Generators::Utils->find_file ($Bin, 'services'),
 	  cachedir      => $self->cachedir,
 	  registry      => $self->registry,
 	  service_names => [],
@@ -286,12 +286,12 @@ sub generate_cgi {
 	  # other args, with no default values
 	  # authority     => 'authority'
 	  # outcode       => ref SCALAR
-
+	  
 	  # and the real parameters
 	  @args );
     $self->_check_outcode (%args);
     
-    my $outdir = File::Spec->rel2abs ($args{outdir});
+    my $outdir = File::Spec->rel2abs ($args{outdir} . "../cgi" );
     $LOG->debug ("Arguments for generating cgi services: " . $self->toString (\%args))
 	if ($LOG->is_debug);
     $LOG->info ("CGI Services will be generated into: '$outdir'")
@@ -343,6 +343,90 @@ sub generate_cgi {
 			   $outfile ) || $LOG->logdie ($tt->error());
 		chmod (0755, $outfile);
 		$LOG->info ("\tCGI service created at '$outfile'\n");
+		 
+	}
+    }
+}
+
+
+#-----------------------------------------------------------------
+# generate_async
+#-----------------------------------------------------------------
+sub generate_async {
+    my ($self, @args) = @_;
+    my %args =
+	( # some default values
+	  impl_outdir   => ( $MOBYCFG::GENERATORS_IMPL_OUTDIR ||
+			     MOSES::MOBY::Generators::Utils->find_file ($Bin, 'services') ),
+	  impl_prefix   => $MOBYCFG::GENERATORS_IMPL_PACKAGE_PREFIX,
+	  cachedir      => $self->cachedir,
+	  registry      => $self->registry,
+	  service_names => [],
+      force_over    => 0,
+	  static_impl   => 0,
+
+	  # and the real parameters
+	  @args );
+    $self->_check_outcode (%args);
+    
+    my $outdir = File::Spec->rel2abs ($args{impl_outdir});
+    $LOG->debug ("Arguments for generating async services: " . $self->toString (\%args))
+	if ($LOG->is_debug);
+    $LOG->info ("ASYNC Services will be generated into: '$outdir'")
+	unless $args{outcode};
+
+    # get objects from a local cache
+    my $cache = MOSES::MOBY::Cache::Central->new (cachedir => $args{cachedir}, registry => $args{registry});
+    my @names = ();
+    push (@names, $args{authority}, @{ $args{service_names} })
+	if $args{authority};
+    my @services = $cache->get_services (@names);
+
+    # generate from template
+    my $tt = Template->new ( ABSOLUTE => 1 );
+    my $input = MOSES::MOBY::Generators::Utils->find_file
+	($Bin,
+	 'MOSES', 'MOBY', 'Generators', 'templates',
+	 'service-async.tt');
+
+    foreach my $obj (@services) {
+	my $name = $obj->name;
+	my $impl = {
+	    package => ($args{impl_prefix} || 'Service') . '::' . $name,
+	};
+	$LOG->debug ("$name\n");
+	if ($args{outcode}) {
+	    # check if the same service is already loaded
+	    # (it can happen when this subroutine is called several times)
+	    next if eval '%' . $obj->module_name . '::';
+	    $tt->process ( 
+	    	$input, 
+	    	{ 
+	    		impl   => $impl,
+	    		obj 		  => $obj, 
+	    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
+	    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
+	    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
+	    	},
+			$args{outcode} )
+		 || $LOG->logdie ($tt->error());
+	} else {
+	    # we cannot easily check whether the same file was already
+	    # generated - so we don't
+	    my $outfile =
+		File::Spec->catfile ( $outdir, split (/::/, $impl->{package}) )
+		. 'Async.pm';
+	    $tt->process ( $input, 
+	    	{
+	    		impl		  => $impl, 
+	    		obj 		  => $obj, 
+	    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
+	    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
+	    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
+	    	},
+			   $outfile ) || $LOG->logdie ($tt->error());
+		chmod (0755, $outfile);
+		$LOG->info ("\tAsync service created at '$outfile'\n");
 		 
 	}
     }
@@ -424,6 +508,98 @@ sub update_table {
 	or $self->throw ("cannot write to '$file_with_table': $!\n");
     close DISPATCH;
     $LOG->info ("Updated services table '$file_with_table'. New contents: " .
+		$self->toString ($DISPATCH_TABLE));
+}
+
+#-----------------------------------------------------------------
+# update_async_table
+#-----------------------------------------------------------------
+sub update_async_table {
+    my ($self, @args) = @_;
+    my %args =
+	( # some default values
+	  impl_outdir    => ( $MOBYCFG::GENERATORS_IMPL_OUTDIR ||
+			      MOSES::MOBY::Generators::Utils->find_file ($Bin, 'services') ),
+	  services_table => ($MOBYCFG::GENERATORS_IMPL_ASYNC_SERVICES_TABLE || 'ASYNC_SERVICES_TABLE'),
+	  impl_prefix    => ($MOBYCFG::GENERATORS_IMPL_PACKAGE_PREFIX || 'Service'),
+	  cachedir       => $self->cachedir,
+	  registry       => $self->registry,
+	  service_names  => [],
+
+	  # other args, with no default values
+	  # authority     => 'authority'
+	  # outcode       => ref SCALAR
+
+	  # and the real parameters
+	  @args );
+    $self->_check_outcode (%args);
+
+    my $outdir = File::Spec->rel2abs ($args{impl_outdir});
+    $LOG->debug ("Arguments for generating async services table: " . $self->toString (\%args))
+	if ($LOG->is_debug);
+
+    # read the current service table
+    unshift (@INC, $args{impl_outdir});   # place where ASYNC_SERVICES_TABLE could be
+    use vars qw ( $DISPATCH_TABLE );
+    eval { require $args{services_table} };
+    my $file_with_table;
+    if ($@) {
+	$LOG->warn ("Cannot find table of async services '" . $args{services_table} . "': $@");
+	$file_with_table = File::Spec->catfile ($args{impl_outdir}, $args{services_table});
+    } else {
+	$file_with_table = $INC{ $args{services_table} };
+    }
+
+    # get names of services that should be added to the service table:
+    my @names = ();
+    if ($args{service_names} and @{ $args{service_names} } > 0) {
+	# 1) if there are service_names given, take them, and that's it
+	#    (TBD?: should I checked names against the cache?)
+	@names = @{ $args{service_names} };
+    } else {
+	# 2) otherwise we need to get names from the cache
+	my $cache = MOSES::MOBY::Cache::Central->new (cachedir => $args{cachedir},
+					       registry => $args{registry});
+	my %by_authorities = $cache->get_service_names;
+	if ($args{authority}) {
+	    my $authority = $by_authorities{ $args{authority} };
+	    $self->throw ("Unknown authority '$args{authority}'.")
+		unless $authority;
+	    @names = @{ $authority };
+	} else {
+	    foreach my $authority (keys %by_authorities) {
+		push (@names, @{ $by_authorities{$authority} });
+	    }
+	}
+    }
+    # dont want the redefined errors in Async to discourage service developer
+    no warnings qw(redefine);
+	require MOBY::Async::WSRF;
+
+    # update dispatch table
+    foreach my $service_name (@names) {
+	$DISPATCH_TABLE->{$WSRF::Constants::MOBY."#$service_name"} 
+		= $args{impl_prefix} . '::' . $service_name . 'Async';
+    $DISPATCH_TABLE->{$WSRF::Constants::MOBY."#$service_name".'_submit'} 
+    	= $args{impl_prefix} . '::' . $service_name . 'Async';
+    $DISPATCH_TABLE->{$WSRF::Constants::WSRPW .'/GetResourceProperty/GetResourcePropertyRequest'} 
+    	= "MOBY::Async::SimpleServer";
+    $DISPATCH_TABLE->{$WSRF::Constants::WSRPW.'/GetMultipleResourceProperties/GetMultipleResourcePropertiesRequest'} 
+    	= "MOBY::Async::SimpleServer";
+    $DISPATCH_TABLE->{$WSRF::Constants::WSRLW.'/ImmediateResourceTermination/DestroyRequest'} 
+    	= "MOBY::Async::SimpleServer";
+	
+#	$DISPATCH_TABLE->{"http://biomoby.org/#$service_name"} =
+#	    $args{impl_prefix} . '::' . $service_name;
+	}
+    # ...and write it back to a disk
+    require Data::Dumper;
+    open DISPATCH, ">$file_with_table"
+	or $self->throw ("Cannot open for writing '$file_with_table': $!\n");
+    print DISPATCH Data::Dumper->Dump ( [$DISPATCH_TABLE], ['DISPATCH_TABLE'] )
+	or $self->throw ("cannot write to '$file_with_table': $!\n");
+    close DISPATCH;
+    $LOG->info ("Updated async services table '$file_with_table'. New contents: " .
 		$self->toString ($DISPATCH_TABLE));
 }
 

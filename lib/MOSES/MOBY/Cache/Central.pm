@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Central.pm,v 1.6 2008/05/09 20:21:48 kawas Exp $
+# $Id: Central.pm,v 1.7 2008/06/04 16:14:31 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Cache::Central;
@@ -31,7 +31,7 @@ use constant NAMESPACES_CACHE   => 'namespaces';
 use constant SERVICETYPES_CACHE => 'serviceTypes';
 
 # the version of this file:
-$VERSION = sprintf "%d.%02d", q$Revision: 1.6 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.7 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 
@@ -318,7 +318,7 @@ sub create_datatype_cache {
 				sub {
 					my $soap = shift;
 					my $res  = shift;
-					$self->throw ("There was a problem calling the registry: " . $self->_endpoint . "\@ " . $self->_namespace . ".\n" + $res);	
+					$self->throw ("There was a problem calling the registry: " . $self->_endpoint . "\@ " . $self->_namespace . ".\n" . $res);	
 				}
 			  );
 
@@ -422,7 +422,7 @@ sub update_datatype_cache {
 				sub {
 					my $soap = shift;
 					my $res  = shift;
-					$self->throw ("There was a problem calling the registry: " . $self->_endpoint . "\@ " . $self->_namespace . ".\n" + $res);	
+					$self->throw ("There was a problem calling the registry: " . $self->_endpoint . "\@ " . $self->_namespace . ".\n" . $res);	
 				}
 			  );
 

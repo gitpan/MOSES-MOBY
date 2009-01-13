@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: DateTime.pm,v 1.4 2008/04/29 19:35:57 kawas Exp $
+# $Id: DateTime.pm,v 1.5 2008/11/06 18:41:40 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Data::DateTime;
@@ -13,7 +13,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 
@@ -24,8 +24,8 @@ MOSES::MOBY::Data::DateTime - A primite Moby data type for dates/times
  use MOSES::MOBY::Data::DateTime;
 
  # create a Moby DateTime
- my $data = MOSES::MOBY::Data::MobyDateTime->new (value => '1994-11-05T08:15:30-05:00');
- my $data = MOSES::MOBY::Data::MobyDateTime->new ('1994-11-05T08:15:30-05:00');
+ my $data = MOSES::MOBY::Data::DateTime->new (value => '1994-11-05T08:15:30-05:00');
+ my $data = MOSES::MOBY::Data::DateTime->new ('1994-11-05T08:15:30-05:00');
  
 =head1 DESCRIPTION
 	
