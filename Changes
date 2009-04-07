@@ -1,5 +1,11 @@
 Revision history for Perl extension MOSES::MOBY.
 
+.88 
+	- Added support for Asynchronous POST services.
+	  moses-service-tester, moses-generate-services,
+	  and moses-install all have been updated.
+	  
+
 .87 
 	- fixed a string append bug where '+' was used
 	  instead of '.'

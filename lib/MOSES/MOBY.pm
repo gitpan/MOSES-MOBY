@@ -7,7 +7,7 @@ use warnings;
 
 use vars qw{$VERSION @ISA @EXPORT @EXPORT_OK};
 BEGIN {
-	$VERSION = sprintf "%d.%02d", q$Revision: 1.6 $ =~ /: (\d+)\.(\d+)/;
+	$VERSION = sprintf "%d.%02d", q$Revision: 1.8 $ =~ /: (\d+)\.(\d+)/;
 	@ISA       = qw{ Exporter };
 	@EXPORT    = qw{};
 	@EXPORT_OK = qw{};
@@ -122,6 +122,8 @@ objects in advance but building them on-the-fly.
 Some of the new features included in this release are:
 
 =over 4
+
+=item * Support for Asynchronous CGI based moby services
 
 =item * Support for CGI based moby services
 
@@ -2054,6 +2056,8 @@ For some tutorials on using Perl MoSeS:
 
 	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_soap_service.html' target='_blank'>Tutorial for creating SOAP based Biomoby Services</a><br/>
 	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_cgi_service.html' target='_blank'>Tutorial for creating CGI based Biomoby Services</a>
+	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_cgi_async_service.html' target='_blank'>Tutorial for creating Asynchronous CGI based Biomoby Services</a>
+	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_async_service.html' target='_blank'>Tutorial for creating Asynchronous SOAP based Biomoby Services</a>
 
 =end html
 

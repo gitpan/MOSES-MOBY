@@ -5,7 +5,7 @@
 #
 # For copyright and disclaimer see below.
 #
-# $Id: GenServices.pm,v 1.7 2008/08/25 16:27:28 kawas Exp $
+# $Id: GenServices.pm,v 1.9 2009/03/30 13:15:03 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Generators::GenServices;
@@ -23,7 +23,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.7 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.9 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # A list of allowed attribute names. See MOSES::MOBY::Base for details.
@@ -291,7 +291,7 @@ sub generate_cgi {
 	  @args );
     $self->_check_outcode (%args);
     
-    my $outdir = File::Spec->rel2abs ($args{outdir} . "../cgi" );
+    my $outdir = File::Spec->rel2abs ($args{outdir} . "/../cgi" );
     $LOG->debug ("Arguments for generating cgi services: " . $self->toString (\%args))
 	if ($LOG->is_debug);
     $LOG->info ("CGI Services will be generated into: '$outdir'")
@@ -312,39 +312,117 @@ sub generate_cgi {
 				       'service-cgi.tt') );
 
     foreach my $obj (@services) {
-	my $name = $obj->name;
-	$LOG->debug ("$name\n");
-	if ($args{outcode}) {
-	    # check if the same service is already loaded
-	    # (it can happen when this subroutine is called several times)
-	    next if eval '%' . $obj->module_name . '::';
-	    $tt->process ( 
-	    	$input, 
-	    	{ 
-	    		obj 		  => $obj, 
-	    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
-	    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
-	    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
-	    	},
-			$args{outcode} )
-		 || $LOG->logdie ($tt->error());
-	} else {
-	    # we cannot easily check whether the same file was already
-	    # generated - so we don't
-	    my $outfile =
-		File::Spec->catfile ( $outdir, split (/\./, $obj->authority), $obj->name ) . '.cgi';
-	    $tt->process ( $input, 
-	    	{ 
-	    		obj 		  => $obj, 
-	    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
-	    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
-	    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
-	    	},
-			   $outfile ) || $LOG->logdie ($tt->error());
-		chmod (0755, $outfile);
-		$LOG->info ("\tCGI service created at '$outfile'\n");
-		 
-	}
+		my $name = $obj->name;
+		$LOG->debug ("$name\n");
+		if ($args{outcode}) {
+		    # check if the same service is already loaded
+		    # (it can happen when this subroutine is called several times)
+		    next if eval '%' . $obj->module_name . '::';
+		    $tt->process ( 
+		    	$input, 
+		    	{ 
+		    		obj 		  => $obj, 
+		    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
+		    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
+		    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
+		    	},
+				$args{outcode} )
+			 || $LOG->logdie ($tt->error());
+		} else {
+		    # we cannot easily check whether the same file was already
+		    # generated - so we don't
+		    my $outfile =
+			File::Spec->catfile ( $outdir, split (/\./, $obj->authority), $obj->name ) . '.cgi';
+		    $tt->process ( $input, 
+		    	{ 
+		    		obj 		  => $obj, 
+		    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
+		    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
+		    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
+		    	},
+				   $outfile ) || $LOG->logdie ($tt->error());
+			chmod (0755, $outfile);
+			$LOG->info ("\tCGI service created at '$outfile'\n");
+			 
+		}
+    }
+}
+
+#-----------------------------------------------------------------
+# generate_async_cgi
+#-----------------------------------------------------------------
+sub generate_async_cgi {
+    my ($self, @args) = @_;
+    my %args =
+	( # some default values
+	  outdir        => $MOBYCFG::GENERATORS_IMPL_OUTDIR ||
+			     	   MOSES::MOBY::Generators::Utils->find_file ($Bin, 'services'),
+	  cachedir      => $self->cachedir,
+	  registry      => $self->registry,
+	  service_names => [],
+
+	  # other args, with no default values
+	  # authority     => 'authority'
+	  # outcode       => ref SCALAR
+	  
+	  # and the real parameters
+	  @args );
+    $self->_check_outcode (%args);
+    
+    my $outdir = File::Spec->rel2abs ($args{outdir} . "/../cgi" );
+    $LOG->debug ("Arguments for generating async cgi services: " . $self->toString (\%args))
+	if ($LOG->is_debug);
+    $LOG->info ("Async CGI Services will be generated into: '$outdir'")
+	unless $args{outcode};
+
+    # get objects from a local cache
+    my $cache = MOSES::MOBY::Cache::Central->new (cachedir => $args{cachedir}, registry => $args{registry});
+    my @names = ();
+    push (@names, $args{authority}, @{ $args{service_names} })
+	if $args{authority};
+    my @services = $cache->get_services (@names);
+
+    # generate from template
+    my $tt = Template->new ( ABSOLUTE => 1 );
+    my $input = File::Spec->rel2abs ( MOSES::MOBY::Generators::Utils->find_file
+				      ($Bin,
+				       'MOSES', 'MOBY', 'Generators', 'templates',
+				       'service-cgi-async.tt') );
+
+    foreach my $obj (@services) {
+		my $name = $obj->name;
+		$LOG->debug ("$name\n");
+		if ($args{outcode}) {
+		    # check if the same service is already loaded
+		    # (it can happen when this subroutine is called several times)
+		    next if eval '%' . $obj->module_name . '::';
+		    $tt->process ( 
+		    	$input, 
+		    	{ 
+		    		obj 		  => $obj, 
+		    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
+		    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
+		    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
+		    	},
+				$args{outcode} )
+			 || $LOG->logdie ($tt->error());
+		} else {
+		    # we cannot easily check whether the same file was already
+		    # generated - so we don't
+		    my $outfile =
+			File::Spec->catfile ( $outdir, split (/\./, $obj->authority), $obj->name ) . '.cgi';
+		    $tt->process ( $input, 
+		    	{ 
+		    		obj 		  => $obj, 
+		    	  	pmoses_home   => $MOBYCFG::USER_REGISTRIES_USER_REGISTRIES_DIR,
+		    	  	generated_dir => $MOBYCFG::GENERATORS_OUTDIR,
+		    	  	services_dir  => $MOBYCFG::GENERATORS_IMPL_OUTDIR,
+		    	},
+				   $outfile ) || $LOG->logdie ($tt->error());
+			chmod (0755, $outfile);
+			$LOG->info ("\tAsync CGI service created at '$outfile'\n");
+			 
+		}
     }
 }
 

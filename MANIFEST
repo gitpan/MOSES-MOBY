@@ -23,6 +23,7 @@ inc/Module/Install/Share.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/MOSES/MOBY.pm
+lib/MOSES/MOBY/Async.pm
 lib/MOSES/MOBY/Base.pm
 lib/MOSES/MOBY/Cache/Central.pm
 lib/MOSES/MOBY/Cache/Registries.pm
@@ -46,6 +47,7 @@ lib/MOSES/MOBY/Generators/GenTypes.pm
 lib/MOSES/MOBY/Generators/templates/datatype.tt
 lib/MOSES/MOBY/Generators/templates/service-async.tt
 lib/MOSES/MOBY/Generators/templates/service-base.tt
+lib/MOSES/MOBY/Generators/templates/service-cgi-async.tt
 lib/MOSES/MOBY/Generators/templates/service-cgi.tt
 lib/MOSES/MOBY/Generators/templates/service.tt
 lib/MOSES/MOBY/Generators/Utils.pm

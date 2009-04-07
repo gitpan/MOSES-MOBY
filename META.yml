@@ -21,18 +21,23 @@ no_index:
     - t
 requires:
   Carp: 0
+  CGI: 0
   Class::Inspector: 1.17
   Config::Simple: 4.58
   File::HomeDir: 0.65
   File::ShareDir: 0.05
   File::Spec: 0.8
+  HTTP::Date: 5.81
   IO::Prompt: 0.99.2
   IO::Stringy: 2.11
   Log::Log4perl: 1.12
+  MOBY::Client::Central: 1.06
   Params::Util: 0.28
   SOAP::Lite: 0.69
   Template: 1.11
   Unicode::String: 2.09
+  Want: 0.18
+  WSRF::Lite: 0.8.2.5
   XML::LibXML: 1.62
-version: 0.85
+version: 0.88
 

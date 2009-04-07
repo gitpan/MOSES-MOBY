@@ -2,7 +2,7 @@
 #
 # Prepare the stage...
 #
-# $Id: moses-install.pl,v 1.5 2008/08/25 16:28:57 kawas Exp $
+# $Id: moses-install.pl,v 1.6 2009/03/30 13:17:04 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
@@ -271,6 +271,7 @@ if (-e $cgibin_file and ! $opt_F) {
 }
 
 # AsyncMobyServer.cgi file
+
 my $async_cgibin_file = "$pmoses_home/AsyncMobyServer.cgi";
 if (-e $async_cgibin_file and ! $opt_F) {
     say "\nWeb Server file '$async_cgibin_file' exists.";

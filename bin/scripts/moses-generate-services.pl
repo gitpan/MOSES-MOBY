@@ -2,14 +2,14 @@
 #
 # Generate services.
 #
-# $Id: moses-generate-services.pl,v 1.6 2008/08/25 16:28:57 kawas Exp $
+# $Id: moses-generate-services.pl,v 1.7 2009/03/30 13:16:38 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
 # some command-line options
 use Getopt::Std;
-use vars qw/ $opt_h $opt_A $opt_d $opt_R $opt_v $opt_a $opt_s $opt_b $opt_f $opt_u $opt_F $opt_S $opt_t $opt_c /;
-getopts('hdvasbfuFStcAR:');
+use vars qw/ $opt_h $opt_A $opt_d $opt_R $opt_v $opt_a $opt_s $opt_b $opt_f $opt_u $opt_F $opt_S $opt_t $opt_c $opt_C /;
+getopts('hdvasbfuFStcCAR:');
 # usage
 if (not($opt_u or $opt_f)) {
 if ($opt_h or (not $opt_a and @ARGV == 0)) {
@@ -39,8 +39,12 @@ Usage: [-vds] [-R registry-string] [-b|S|t|c|A] authority [service-name] [servic
     -S ... generate implementation and the base of service[s], the
            implementation module has enabled option to read the base
            statically (that is why it is also generated here)
+    
     -i ... generate an implementation of the given service
+    
     -c ... generate a cgi based implementation of the given service
+    -C ... generate an asynchronous cgi based implementation of the given service
+    
     -A ... generate an asynchronous based implementation of the given service       
     -t ... update dispatch table of services (a table used by the
 	       cgi-bin script and SOAP::Lite to dispatch requests);
@@ -118,6 +122,9 @@ if ($opt_a) {
     }  elsif ($opt_c) {
     $generator->generate_impl;
 	$generator->generate_cgi;
+    } elsif ($opt_C) {
+    $generator->generate_impl;
+	$generator->generate_async_cgi;
     } elsif ($opt_t) {
 	$generator->update_table;
     } elsif ($opt_A) {
@@ -144,7 +151,14 @@ if ($opt_a) {
 		$generator->generate_cgi(service_names => [@ARGV],
 				       authority     => $authority,
 				       outcode       => \$code);
-    }elsif ($opt_A) {
+    } elsif ($opt_C) {
+    	$generator->generate_impl(service_names => [@ARGV],
+				       authority     => $authority,
+				       outcode       => \$code);
+		$generator->generate_async_cgi(service_names => [@ARGV],
+				       authority     => $authority,
+				       outcode       => \$code);
+    } elsif ($opt_A) {
 		$generator->generate_async(service_names => [@ARGV],
 					       authority     => $authority,
 					       outcode       => \$code);
@@ -185,6 +199,13 @@ if ($opt_a) {
 					authority     => $authority,
 					force_over    => $opt_F);
 		$generator->generate_cgi(service_names => [@ARGV],
+				      authority     => $authority);
+    } elsif ($opt_C) {
+    	$generator->generate_impl(
+					service_names => [@ARGV],
+					authority     => $authority,
+					force_over    => $opt_F);
+		$generator->generate_async_cgi(service_names => [@ARGV],
 				      authority     => $authority);
     } elsif ($opt_t) {
 	    $generator->update_table (service_names => [@ARGV],
