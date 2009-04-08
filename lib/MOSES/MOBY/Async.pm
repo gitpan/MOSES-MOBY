@@ -4,7 +4,7 @@
 #
 # For copyright and disclaimer see below.
 #
-# $Id: Async.pm,v 1.1 2009/03/30 13:16:00 kawas Exp $
+# $Id: Async.pm,v 1.2 2009/04/08 20:46:23 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Async;
@@ -19,7 +19,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.1 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.2 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 
@@ -296,7 +296,8 @@ sub submit {
 		$WSRF::WSRP::Private{$property_pid}               = '';
 		$WSRF::WSRP::ResourceProperties{$property_status} = $status->XML();
 		$WSRF::WSRP::ResourceProperties{$property_result} =
-		  $out_package_for_this_job->job_by_id( $job->jid )->toXML->toString(0);
+		  #$out_package_for_this_job->job_by_id( $job->jid )->toXML->toString(0);
+		  $out_package_for_this_job->toXML->toString(0);
 		$lock->toFile();
 
 		# Exits the child process

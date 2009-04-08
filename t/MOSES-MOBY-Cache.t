@@ -38,7 +38,7 @@ ok($endpoint eq $cache->_endpoint, "endpoint - set during constructor")
 $cache = new MOSES::MOBY::Cache::Central( );
 ok($cachedir ne $cache->cachedir, "cachedir - default during constructor") 
 	or diag('cachedir was not set properly.');
-ok('default' eq $cache->registry, "registry - default during constructor") 
+ok('' ne $cache->registry, "registry - default during constructor") 
 	or diag('registry was not set properly.');
 ok('' ne $cache->_namespace, "namespace - set during default constructor") 
 	or diag($cache->_namespace . " is not the same as $namespace");

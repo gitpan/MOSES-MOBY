@@ -2,7 +2,7 @@
 #
 # Prepare the stage...
 #
-# $Id: moses-install.pl,v 1.6 2009/03/30 13:17:04 kawas Exp $
+# $Id: moses-install.pl,v 1.7 2009/04/08 22:42:51 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
@@ -24,6 +24,7 @@ Usage: [-F]
        services.log
        parser.log
        MobyServer.cgi
+       AsyncMobyServer.cgi
     The existing files are not overwritten - unless an option -F
     has been used.
 
@@ -66,7 +67,7 @@ END_OF_USAGE
 		check_module ($module);
     }
     # check for async libraries if user wants to ....
-    print STDOUT "Shall we check for the moby-async libraries\n\t(do this only if you plan on creating async moby services)? y/n [n]";
+    print STDOUT "Shall we check for the moby-async libraries\n\t(do this only if you plan on creating soap based\n\t async moby services)? y/n [n]";
     my $tmp = <STDIN>;
     $tmp =~ s/\s//g; 
     if ($tmp =~ /y/i) {

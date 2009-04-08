@@ -7,7 +7,7 @@ use warnings;
 
 use vars qw{$VERSION @ISA @EXPORT @EXPORT_OK};
 BEGIN {
-	$VERSION = sprintf "%d.%02d", q$Revision: 1.8 $ =~ /: (\d+)\.(\d+)/;
+	$VERSION = sprintf "%d.%02d", q$Revision: 1.10 $ =~ /: (\d+)\.(\d+)/;
 	@ISA       = qw{ Exporter };
 	@EXPORT    = qw{};
 	@EXPORT_OK = qw{};
@@ -907,6 +907,8 @@ With options, you can generated other Perl Moses pieces:
    rather than load the base" enabled.<p/>
    Option <strong>-c</strong> generates both a <a href="#perl_modules_representing_bases_of_service_implementations">service implementation</a> 
      as well as a CGI dispatcher script.<p/>
+   Option <strong>-C</strong> generates both a <a href="#perl_modules_representing_bases_of_service_implementations">service implementation</a> 
+     as well as an Asynchronous CGI dispatcher script.<p/>
    Option <strong>-A</strong> generates both a <a href="#perl_modules_representing_bases_of_service_implementations">service implementation</a> 
      as well as an asynchronous module (and it updates the dispatcher table, as well).<p/>
    Option <strong>-u</strong> updates the service cache.<p/>
@@ -949,11 +951,11 @@ At the time of writing this documentation, the response was (note that one of th
 IRRI, MIPS, default, iCAPTURE, testing
 $Registries = {
    'testing' => {
-      'namespace' => 'http://mobycentral.cbr.nrc.ca:8080/MOBY/Central',
+      'namespace' => 'http://bioinfo.icapture.ubc.ca/MOBY/Central',
       'public' => 'yes',
       'name' => 'Testing BioMoby registry',
       'contact' => 'Edward Kawas (edward.kawas@gmail.com)',
-      'endpoint' => 'http://mobycentral.cbr.nrc.ca:8080/cgi-bin/MOBY05/mobycentral.pl'
+      'endpoint' => 'http://bioinfo.icapture.ubc.ca/cgi-bin/mobycentral/MOBY-Central.pl'
       },
    'IRRI' => {
       'namespace' => 'http://cropwiki.irri.org/MOBY/Central',
@@ -967,12 +969,12 @@ entities within GCP.',
        'endpoint' => 'http://cropwiki.irri.org/cgi-bin/MOBY-Central.pl'
        },
    'iCAPTURE' => {
-       'namespace' => 'http://mobycentral.icapture.ubc.ca/MOBY/Central',
+       'namespace' => 'http://moby.ucalgary.ca/MOBY/Central',
        'text' => 'A curated public registry hosted at the iCAPTURE Centre, Vancouver',
        'public' => 'yes',
        'name' => 'iCAPTURE Centre, Vancouver',
        'contact' => 'Edward Kawas (edward.kawas@gmail.com)',
-       'endpoint' => 'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl'
+       'endpoint' => 'http://moby.ucalgary.ca/moby/MOBY-Central.pl'
        },
    'default' => $Registries->{'iCAPTURE'},
    'MIPS' => {
@@ -2055,9 +2057,9 @@ For some tutorials on using Perl MoSeS:
 =begin html
 
 	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_soap_service.html' target='_blank'>Tutorial for creating SOAP based Biomoby Services</a><br/>
-	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_cgi_service.html' target='_blank'>Tutorial for creating CGI based Biomoby Services</a>
-	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_cgi_async_service.html' target='_blank'>Tutorial for creating Asynchronous CGI based Biomoby Services</a>
-	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_async_service.html' target='_blank'>Tutorial for creating Asynchronous SOAP based Biomoby Services</a>
+	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_cgi_service.html' target='_blank'>Tutorial for creating CGI based Biomoby Services</a><br/>
+	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_cgi_async_service.html' target='_blank'>Tutorial for creating Asynchronous CGI based Biomoby Services</a><br/>
+	<a href='http://biomoby.open-bio.org/CVS_CONTENT/moby-live/Docs/MOBY-S_API/Perl/construct_moses_async_service.html' target='_blank'>Tutorial for creating Asynchronous SOAP based Biomoby Services</a><br/>
 
 =end html
 
