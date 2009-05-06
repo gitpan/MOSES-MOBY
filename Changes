@@ -1,5 +1,15 @@
 Revision history for Perl extension MOSES::MOBY.
 
+.90
+	- bug fix: when sending data with newlines on
+	  a WinOS, \r was causing problems with the
+	  incoming message.
+	- bug fix: moses-testing-service.pl was truncating
+	  the message sent to an async POST service.
+	- bug fix: when datatypes contained a dash, they
+	  were inadvertently converted to underscore,
+	  resulting in incorrect typing 
+
 .89 
 	- The tag MOBY was missing in the async cgi
 	  response for 'results'.

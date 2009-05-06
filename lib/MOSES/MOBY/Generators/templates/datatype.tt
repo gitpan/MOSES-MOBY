@@ -48,6 +48,17 @@ use MOSES::MOBY::Data::DateTime;
 	return $self->SUPER::_attr_prop ($attr_name, $prop_name);
     }
 }
+
+# here we ensure that we set the mobyname (used in XML genesis)
+sub init {
+    my ($self) = shift;
+    $self->SUPER::init();
+    [% IF obj.name %]
+    $self->mobyname('[% obj.name %]');
+    [% END %]
+    
+}
+
 [% IF full_source %]
 1;
 __END__

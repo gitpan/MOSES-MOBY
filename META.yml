@@ -39,5 +39,5 @@ requires:
   Want: 0.18
   WSRF::Lite: 0.8.2.5
   XML::LibXML: 1.62
-version: 0.89
+version: 0.90
 

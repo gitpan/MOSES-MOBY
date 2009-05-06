@@ -2,7 +2,7 @@
 #
 # Calling a BioMoby services (with or without SOAP).
 #
-# $Id: moses-testing-service.pl,v 1.9 2009/04/02 16:10:14 kawas Exp $
+# $Id: moses-testing-service.pl,v 1.11 2009/04/16 18:17:24 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
@@ -14,7 +14,7 @@ BEGIN {
 	getopts('hdvl:e:c:C:a:');
 
 	# usage
-	if ( $opt_h or ( @ARGV == 0 and ( not $opt_c ) ) ) {
+	if ( $opt_h or ( @ARGV == 0 and ( not $opt_c or not $opt_C ) ) ) {
 		print STDOUT <<'END_OF_USAGE';
 Calling a BioMoby services (without using SOAP, just locally).
 Usage: # calling a local module representing a service, without using SOAP
@@ -291,8 +291,8 @@ if ($opt_e) {
 	# post to the web service
 	my $ua = LWP::UserAgent->new;
 	my $req = HTTP::Request->new( POST => $opt_C );
-	$req->content_type('application/x-www-form-urlencoded');
-	$req->content("data=$input");
+	$req->content_type('text/xml');
+	$req->content("$input");
 
 	# get the response
 	my $response = $ua->request($req);
@@ -581,7 +581,7 @@ sub _moby_wsrf_header {
 	my ( $url, $id ) = @_;
 	return <<"END OF XML";
 <moby-wsrf>
-<wsa:Action xmlns:wsa="http://www.w3.org/2005/08/addressing">http://docs.oasis-open.org/wsrf/rpw-2/GetResourceProperty/GetResourcePropertiesRequest</wsa:Action>
+<wsa:Action xmlns:wsa="http://www.w3.org/2005/08/addressing">http://docs.oasis-open.org/wsrf/rpw-2/GetMultipleResourceProperties/GetMultipleResourcePropertiesRequest</wsa:Action>
 <wsa:To xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsa="http://www.w3.org/2005/08/addressing" wsu:Id="To">$url</wsa:To>
 <mobyws:ServiceInvocationId xmlns:mobyws="http://biomoby.org/" xmlns:wsa="http://www.w3.org/2005/08/addressing" wsa:IsReferenceParameter="true">$id</mobyws:ServiceInvocationId>
 </moby-wsrf>

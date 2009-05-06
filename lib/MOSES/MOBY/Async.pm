@@ -4,7 +4,7 @@
 #
 # For copyright and disclaimer see below.
 #
-# $Id: Async.pm,v 1.2 2009/04/08 20:46:23 kawas Exp $
+# $Id: Async.pm,v 1.3 2009/05/06 13:47:31 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Async;
@@ -19,7 +19,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.2 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.3 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 
@@ -454,6 +454,7 @@ sub result {
 	my $ans = '';
 	foreach my $queryID (@ids) {
 		my $property_status = "result_$queryID";
+		# TODO - does the property exist? if not throw error so we dont pass invalid XML
 		$ans .= "<"
 		  . $WSRF::WSRP::PropertyNamespaceMap->{$property_status}{prefix}
 		  . ":$property_status";
@@ -575,6 +576,8 @@ sub poll {
 	my $ans = '';
 	foreach my $queryID (@ids) {
 		my $property_status = "status_$queryID";
+		# does our property exist? 
+		# TODO - throw error if property doesnt exist so that we dont pass invalid XML
 		$ans .= "<"
 		  . $WSRF::WSRP::PropertyNamespaceMap->{$property_status}{prefix}
 		  . ":$property_status";
