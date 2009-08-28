@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Service.pm,v 1.4 2008/04/29 19:41:38 kawas Exp $
+# $Id: Service.pm,v 1.5 2009/08/27 19:39:26 kawas Exp $
 #-----------------------------------------------------------------
 package MOSES::MOBY::Def::Service;
 use base qw( MOSES::MOBY::Base );
@@ -13,7 +13,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 
@@ -260,7 +260,7 @@ sub toXML {
 sub _check_category {
     my ($self, $attr) = @_;
     $self->throw ('Invalid service category: ' . $self->category)
-	unless $self->category =~ /^cgi|wsdl|moby|moby\-async|post$/i;
+	unless $self->category =~ /^cgi|wsdl|moby|moby\-async|post|cgi\-async$/i;
 }
 
 1;

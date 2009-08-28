@@ -3,7 +3,7 @@
 # Author: Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Registries.pm,v 1.5 2008/11/06 18:32:33 kawas Exp $
+# $Id: Registries.pm,v 1.6 2009/08/19 17:07:26 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Cache::Registries;
@@ -13,7 +13,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.6 $ =~ /: (\d+)\.(\d+)/;
 
 use vars qw/ %REGISTRIES /;
 
@@ -54,10 +54,10 @@ BEGIN {
 				text      => 'The MOBY registry at the International Rice Research Institute (IRRI) is intended mostly for Generation Challenge Program (GCP) developers. It allows the registration of experimental moby entities within GCP.',
 			},
 			testing => {
-				endpoint  => 'http://bioinfo.icapture.ubc.ca/cgi-bin/mobycentral/MOBY-Central.pl',
-				namespace => 'http://bioinfo.icapture.ubc.ca/MOBY/Central',
+				endpoint  => 'http://mobytest.biordf.net/MOBY-Central.pl',
+				namespace => 'http://mobytest.biordf.net/MOBY/Central',
 				name      => 'Testing BioMoby registry',
-				contact   => 'Edward Kawas (edward.kawas@gmail.com)',
+				contact   => 'Edward Kawas (edward.kawas+testregistry@gmail.com)',
 				public    => 'yes',
 			},
 		);

@@ -14,8 +14,8 @@ BEGIN {
 
 my $cachedir = "/usr/local/cache/";
 my $registry = "testing";
-my $endpoint = "http://bioinfo.icapture.ubc.ca/cgi-bin/mobycentral/MOBY-Central.pl";
-my $namespace = "http://bioinfo.icapture.ubc.ca/MOBY/Central";
+my $endpoint = "http://mobytest.biordf.net/MOBY-Central.pl";
+my $namespace = "http://mobytest.biordf.net/MOBY/Central";
 
 
 my $cache;

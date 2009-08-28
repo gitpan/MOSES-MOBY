@@ -1,5 +1,13 @@
 Revision history for Perl extension MOSES::MOBY.
 
+0.91
+	- Updated the Makefile.PL to handle some missing 
+	  dependencies.
+	- bug fix: fixed the unsuccessful stat on filename
+	  warning in service-base.tt
+	- updated the categories in Service.pm
+	- updated Makefile.PL to reflect dependency upgrades
+	  and versioning
 .90
 	- bug fix: when sending data with newlines on
 	  a WinOS, \r was causing problems with the

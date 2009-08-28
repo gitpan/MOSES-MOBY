@@ -112,7 +112,9 @@ sub [% obj.name %] {
     Log::Log4perl::NDC->push ($$);
     $LOG->info ('*** REQUEST START *** ' . $self->log_request);
 
+    no warnings 'newline';
     my $in_testing_mode = (-f $data);
+    use warnings 'newline';
     if ($LOG->is_debug) {
        if ($in_testing_mode) {
 	   open (RAWXML, "<$data") or $LOG->logdie ("Cannot open $data: $!\n");

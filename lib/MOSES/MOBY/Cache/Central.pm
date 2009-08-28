@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Central.pm,v 1.7 2008/06/04 16:14:31 kawas Exp $
+# $Id: Central.pm,v 1.8 2009/08/27 19:40:50 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Cache::Central;
@@ -31,7 +31,7 @@ use constant NAMESPACES_CACHE   => 'namespaces';
 use constant SERVICETYPES_CACHE => 'serviceTypes';
 
 # the version of this file:
-$VERSION = sprintf "%d.%02d", q$Revision: 1.7 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.8 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 
@@ -708,13 +708,13 @@ sub _createDataTypeFromXML {
     while ( $count > 0 ) {
 	my $node         = $nodes->get_node( $count-- );
 	my $relationship = $node->getAttribute('relationshipType');
-	if ( $relationship =~ /.*:isa$/ ) {
+	if ( $relationship =~ /^.*isa$/i ) {
 	    my $parent = $node->getChildrenByTagName('objectType');
 	    my $isa    = $parent->get_node(1)->textContent
 		if ( $parent and $parent->get_node(1) and $parent->get_node(1) );
 	    $datatype->parent($isa);
 	}
-	elsif ( $relationship =~ /.*:hasa$/ ) {
+	elsif ( $relationship =~ /^.*hasa$/i ) {
 	    my $pNode = $node->getChildrenByTagName('objectType');
 	    for ( my $i = 1 ; $i <= $pNode->size() ; $i++ ) {
 		my $article = $pNode->get_node($i)->getAttribute('articleName')
@@ -735,7 +735,7 @@ sub _createDataTypeFromXML {
 		     );
 	    }
 	}
-	elsif ( $relationship =~ /.*:has$/ ) {
+	elsif ( $relationship =~ /^.*has$/i ) {
 	    my $pNode = $node->getChildrenByTagName('objectType');
 	    for ( my $i = 1 ; $i <= $pNode->size() ; $i++ ) {
 		my $article = $pNode->get_node($i)->getAttribute('articleName')
