@@ -28,6 +28,10 @@
     [%- MACRO is_simple (entry) BLOCK %]
 	[%- ref (entry) == 'MOSES::MOBY::Def::PrimaryDataSimple' %]
     [%- END -%]
+    
+    [%- MACRO is_async (entry) BLOCK %]
+    [%- entry == 'cgi-async' || entry == 'moby-async' %]
+    [%- END -%]
 
     [%- MACRO set_child (child, leftpad, value) BLOCK %]
        [% FILTER indent (leftpad) -%]
@@ -202,6 +206,9 @@ use vars qw( @ISA );
 @ISA = qw( [% base.module_name %] );
 use MOSES::MOBY::Package;
 use MOSES::MOBY::ServiceException;
+[% IF is_async(base.category) -%]
+use MOBY::Async::LSAE;
+[%- END %]
 use strict;
 
 [%# here we output use statements for our primitives %]
@@ -239,7 +246,7 @@ sub process_it {
 #       $response->record_error ( { code => INPUT_INCORRECT_NAMESPACE,
 #                                   msg  => 'This service requires inputs under the namespaces: {"' . join(',', keys %valid_namespaces) . '"}' } );
 #       return;
-#   } unless $valid_namespaces{$namespace};
+#   } unless defined($namespace) && $valid_namespaces{$namespace};
     [%- ELSE %]
     if (defined $[% input.name %]_collection) {
         foreach my $[% input.name %]_element (@{ $[% input.name %]_collection }) {
@@ -250,7 +257,7 @@ sub process_it {
         #       $response->record_error ( { code => INPUT_INCORRECT_NAMESPACE,
         #                                   msg  => 'This service requires inputs under the namespaces: { "' . join(',', keys %valid_namespaces) . '"}' } );
         #       return;
-        #   } unless $valid_namespaces{$namespace};
+        #   } unless defined($namespace) && $valid_namespaces{$namespace};
         }
     }
     [%- END %]
@@ -275,8 +282,23 @@ sub process_it {
     [%- END %]
     [%- END %]
 
-    # do something... (sorry, can't help with that)
-
+    # do something... (sorry, can't you help with that)
+    
+    [%- IF is_async(base.category) %]
+    #simulate a long running service while providing updates
+    
+    #update the state of our service
+    $self->update_state_event($request, 'running','about to sleep for 20 seconds!');
+    
+    # sleep for 20 seconds
+    sleep(20);
+    
+    # update state again
+    $self->update_state_event($request, 'running','Woke up and going back to sleep for 20 more seconds!');
+    
+    # sleep for 20 more seconds
+    sleep(20);
+    [%- END %]
     # EDIT: PUT REAL VALUES INTO THE RESPONSE
     # fill the response
     [%- FOREACH output IN base.outputs %]
@@ -324,6 +346,272 @@ sub process_it {
 # 				 msg  => 'This is an error with a code' } );
 
 }
+
+[%- IF is_async(base.category) -%]
+#-----------------------------------------------------------------
+# update_state_event
+#    This method is used to update the state of your 
+#    LSAE_STATE_CHANGED_EVENT event.
+#
+#  Parameters:  
+#    $request - $request from process_it()
+#    $state - one of (created, running, completed, terminated_by_request, terminated_by_error) 
+#    $msg   - a message to provide regarding the state of our event 
+#-----------------------------------------------------------------
+sub update_state_event {
+    my ( $self, $request, $state, $msg ) = @_;
+
+    my %valid_states = ('created'=>1,'running'=>1,'completed'=>1,'termintated_by_request'=>1,'terminated_by_error'=>1,);
+    
+    $msg = '' unless defined $msg;
+    $state = 'running' unless defined $state;
+    
+    # validate the state of the event ...
+    $state = 'running' unless $valid_states{$state};
+    
+    unless ( defined $ENV{ID} ) {
+        # hmm, local testing of service?
+        $ENV{ID} = WSRF::GSutil::CalGSH_ID();
+        WSRF::File::toFile($ENV{ID});
+    }
+
+    # our service invocation id
+    my $ID = $ENV{ID};
+
+    # our job id
+    my $jid = $request->jid;
+
+    # some variables we need to access/store our event information
+    my $property_pid    = "pid_$jid";
+    my $property_input  = "input_$jid";
+    my $property_status = "status_$jid";
+    my $property_result = "result_$jid";
+
+    # construct an LSAE object based on the old event block
+    my $old_status = LSAE::AnalysisEventBlock->new(
+                                    $WSRF::WSRP::ResourceProperties{$property_status}
+    );
+    # construct a new state changed event
+    my $status = LSAE::AnalysisEventBlock->new();
+    $status->type(LSAE_STATE_CHANGED_EVENT);
+
+    # set the previous state
+    $status->previous_state( $old_status->new_state() ) if defined ($old_status->type) and $old_status->type == LSAE_STATE_CHANGED_EVENT;
+    $status->previous_state( 'created') unless $status->previous_state;
+
+    # set the new state
+    $status->new_state($state);
+    $status->message($msg);
+
+    # set our job id for this event
+    $status->id($jid);
+
+    # create a file based resource that we will store our event information
+    my $lock = WSRF::MobyFile->new( undef, $ID );
+    $WSRF::WSRP::ResourceProperties{$property_status} = $status->XML();
+
+    # here we leave the result empty since the service is still running
+    $WSRF::WSRP::ResourceProperties{$property_result} = '';
+
+    # save the event so that our clients can access the information
+    $lock->toFile();
+    return;
+}
+#-----------------------------------------------------------------
+# update_percentage_event
+#    This method is used to update the state of your 
+#    LSAE_PERCENT_PROGRESS_EVENT event.
+#
+#  Parameters:  
+#    $request     - $request from process_it()
+#    $percentrage - an integer between 0-100 
+#    $msg         - a message to provide regarding the state of our event 
+#-----------------------------------------------------------------
+sub update_percentage_event {
+    my ( $self, $request, $percentage, $msg ) = @_;
+    
+    $msg = '' unless defined $msg;
+    $percentage = 1 unless defined $percentage;
+    
+    # validate the state of the event ...
+    $percentage = 1 unless $percentage >= 0 and $percentage <=100;
+    
+    unless ( defined $ENV{ID} ) {
+        # hmm, local testing of service?
+        $ENV{ID} = WSRF::GSutil::CalGSH_ID();
+        WSRF::File::toFile($ENV{ID});
+    }
+
+    # our service invocation id
+    my $ID = $ENV{ID};
+
+    # our job id
+    my $jid = $request->jid;
+
+    # some variables we need to access/store our event information
+    my $property_pid    = "pid_$jid";
+    my $property_input  = "input_$jid";
+    my $property_status = "status_$jid";
+    my $property_result = "result_$jid";
+
+    # construct an LSAE object based on the old event block
+    my $old_status = LSAE::AnalysisEventBlock->new(
+                                    $WSRF::WSRP::ResourceProperties{$property_status}
+    );
+    # construct a new state changed event
+    my $status = LSAE::AnalysisEventBlock->new();
+    $status->type(LSAE_PERCENT_PROGRESS_EVENT);
+
+    # set the new state
+    $status->percentage($percentage);
+    $status->message($msg);
+
+    # set our job id for this event
+    $status->id($jid);
+
+    # create a file based resource that we will store our event information
+    my $lock = WSRF::MobyFile->new( undef, $ID );
+    $WSRF::WSRP::ResourceProperties{$property_status} = $status->XML();
+
+    # here we leave the result empty since the service is still running
+    $WSRF::WSRP::ResourceProperties{$property_result} = '';
+
+    # save the event so that our clients can access the information
+    $lock->toFile();
+    return;
+}
+
+#-----------------------------------------------------------------
+# update_step_event
+#    This method is used to update the state of your 
+#    LSAE_STEP_PROGRESS_EVENT event.
+#
+#  Parameters:  
+#    $request         - $request from process_it()
+#    $total_steps     - integer representing total steps until completion
+#    $steps_completed - integer representing steps completed 
+#    $msg             - a message to provide regarding the state of our event 
+#-----------------------------------------------------------------
+sub update_step_event {
+    my ( $self, $request, $total_steps, $steps_completed, $msg ) = @_;
+   
+    $msg = '' unless defined $msg;
+    $total_steps = 1 unless defined $total_steps;
+    $steps_completed = 0 unless defined $steps_completed;
+    
+    # validate the state of the event ...
+    $steps_completed = $total_steps if $steps_completed > $total_steps;
+    
+    unless ( defined $ENV{ID} ) {
+        # hmm, local testing of service?
+        $ENV{ID} = WSRF::GSutil::CalGSH_ID();
+        WSRF::File::toFile($ENV{ID});
+    }
+
+    # our service invocation id
+    my $ID = $ENV{ID};
+
+    # our job id
+    my $jid = $request->jid;
+
+    # some variables we need to access/store our event information
+    my $property_pid    = "pid_$jid";
+    my $property_input  = "input_$jid";
+    my $property_status = "status_$jid";
+    my $property_result = "result_$jid";
+
+    # construct an LSAE object based on the old event block
+    my $old_status = LSAE::AnalysisEventBlock->new(
+                                    $WSRF::WSRP::ResourceProperties{$property_status}
+    );
+    # construct a new state changed event
+    my $status = LSAE::AnalysisEventBlock->new();
+    $status->type(LSAE_STEP_PROGRESS_EVENT);
+
+    # set the new state
+    $status->steps_completed($steps_completed);
+    $status->total_steps($total_steps);
+    $status->message($msg);
+
+    # set our job id for this event
+    $status->id($jid);
+
+    # create a file based resource that we will store our event information
+    my $lock = WSRF::MobyFile->new( undef, $ID );
+    $WSRF::WSRP::ResourceProperties{$property_status} = $status->XML();
+
+    # here we leave the result empty since the service is still running
+    $WSRF::WSRP::ResourceProperties{$property_result} = '';
+
+    # save the event so that our clients can access the information
+    $lock->toFile();
+    return;
+}
+
+#-----------------------------------------------------------------
+# update_time_event
+#    This method is used to update the state of your 
+#    LSAE_TIME_PROGRESS_EVENT event.
+#
+#  Parameters:  
+#    $request   - $request from process_it()
+#    $remaining - integer representing seconds until completion 
+#    $msg       - a message to provide regarding the state of our event 
+#-----------------------------------------------------------------
+sub update_time_event {
+    my ( $self, $request, $remaining, $msg ) = @_;
+    
+    $msg = '' unless defined $msg;
+    $remaining = 0 unless defined $remaining;
+    
+    # validate the state of the event ...
+    $remaining = 0 unless $remaining >= 0 ;
+    
+    unless ( defined $ENV{ID} ) {
+        # hmm, local testing of service?
+        $ENV{ID} = WSRF::GSutil::CalGSH_ID();
+        WSRF::File::toFile($ENV{ID});
+    }
+
+    # our service invocation id
+    my $ID = $ENV{ID};
+
+    # our job id
+    my $jid = $request->jid;
+
+    # some variables we need to access/store our event information
+    my $property_pid    = "pid_$jid";
+    my $property_input  = "input_$jid";
+    my $property_status = "status_$jid";
+    my $property_result = "result_$jid";
+
+    # construct an LSAE object based on the old event block
+    my $old_status = LSAE::AnalysisEventBlock->new(
+                                    $WSRF::WSRP::ResourceProperties{$property_status}
+    );
+    # construct a new state changed event
+    my $status = LSAE::AnalysisEventBlock->new();
+    $status->type(LSAE_TIME_PROGRESS_EVENT);
+
+    # set the new state
+    $status->remaining($remaining);
+    $status->message($msg);
+
+    # set our job id for this event
+    $status->id($jid);
+
+    # create a file based resource that we will store our event information
+    my $lock = WSRF::MobyFile->new( undef, $ID );
+    $WSRF::WSRP::ResourceProperties{$property_status} = $status->XML();
+
+    # here we leave the result empty since the service is still running
+    $WSRF::WSRP::ResourceProperties{$property_result} = '';
+
+    # save the event so that our clients can access the information
+    $lock->toFile();
+    return;
+}
+[%- END -%]
 
 1;
 __END__

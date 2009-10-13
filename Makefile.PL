@@ -6,7 +6,7 @@
     
 	# Define metadata
 	name 'MOSES-MOBY';
-	version '0.91';
+	version '0.92';
 	license 'perl';
 	abstract
 'This distribution aids in the creation of BioMOBY perl based web services.';
@@ -42,6 +42,7 @@
 
 	build_requires 'Test::More' => '0.42';
 	no_index 'directory'        => 'bin/scripts';
+	no_index 'directory'        => 'lib/MOSES/MOBY/Generators/templates';
 
 	install_script 'bin/scripts/moses-cache-tester.pl';
 	install_script 'bin/scripts/moses-config-status.pl';

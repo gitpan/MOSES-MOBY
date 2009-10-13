@@ -2,7 +2,7 @@
 #
 # Calling a BioMoby services (with or without SOAP).
 #
-# $Id: moses-testing-service.pl,v 1.11 2009/04/16 18:17:24 kawas Exp $
+# $Id: moses-testing-service.pl,v 1.12 2009/10/09 15:31:00 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
 
@@ -153,6 +153,7 @@ sub _check_status {
 			$completed->{$queryID} = 1;
 		} elsif ( $status->percentage < 100 ) {
 			print "Current percentage: ", $status->percentage, "\n" if $opt_v;
+			print "\tmsg: ", ($status->message ? $status->message : "no message found ..."), "\n" if $opt_v;
 			sleep(20);
 		} else {
 			die "ERROR:  analysis event block not well formed.\n";
@@ -168,6 +169,7 @@ sub _check_status {
 				  || ( $status->new_state =~ m"running"i ) )
 		{
 			print "Current State: ", $status->new_state, "\n" if $opt_v;
+			print "\tmsg: ", ($status->message ? $status->message : "no message found ..."), "\n" if $opt_v;
 			sleep(20);
 		} else {
 			die "ERROR:  analysis event block not well formed.\n";
@@ -178,6 +180,7 @@ sub _check_status {
 			$completed->{$queryID} = 1;
 		} elsif ( $status->steps_completed < $status->total_steps ) {
 			print "Steps completed: ", $status->steps_completed, "\n" if $opt_v;
+			print "\tmsg: ", ($status->message ? $status->message : "no message found ..."), "\n" if $opt_v;
 			sleep(20);
 		} else {
 			die "ERROR:  analysis event block not well formed.\n";
@@ -188,6 +191,7 @@ sub _check_status {
 			$completed->{$queryID} = 1;
 		} elsif ( $status->remaining > 0 ) {
 			print "Time remaining: ", $status->remaining, "\n" if $opt_v;
+			print "\tmsg: ", ($status->message ? $status->message : "no message found ..."), "\n" if $opt_v;
 			sleep(20);
 		} else {
 			die "ERROR:  analysis event block not well formed.\n";

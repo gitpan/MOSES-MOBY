@@ -4,7 +4,7 @@
 #         Edward Kawas <edward.kawas@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Utils.pm,v 1.5 2008/11/06 18:32:33 kawas Exp $
+# $Id: Utils.pm,v 1.7 2009/10/13 16:46:21 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Generators::Utils;
@@ -13,27 +13,21 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.7 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 
 MOSES::MOBY::Utils - what does not fit elsewhere
-
-=cut
 
 =head1 SYNOPSIS
 
  # find a file located somewhere in @INC
  use MOSES::MOBY::Generators::Utils;
  my $file = MOSES::MOBY::Generators::Utils->find_file ('resource.file');
- 
-=cut
 
 =head1 DESCRIPTION
 
 General purpose utilities.
-
-=cut
 
 =head1 AUTHORS
 
@@ -41,12 +35,6 @@ General purpose utilities.
  Edward Kawas (edward.kawas [at] gmail [dot] com)
 
 =head1 SUBROUTINES
-
-=cut
-
-#-----------------------------------------------------------------
-# find_file
-#-----------------------------------------------------------------
 
 =head2 find_file
 
@@ -63,6 +51,9 @@ There are two or more arguments: C<$default_start> and C<@names>.
 
 my %full_path_of = ();
 
+#-----------------------------------------------------------------
+# find_file
+#-----------------------------------------------------------------
 sub find_file {
     my ($self, $default_start, @names) = @_;
     my $fixed_part = File::Spec->catfile (@names);
@@ -87,4 +78,5 @@ sub find_file {
 }
 
 1;
+
 __END__

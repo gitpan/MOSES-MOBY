@@ -200,7 +200,9 @@ sub [% obj.name %] {
 	if ($LOG->is_debug) {
 	    my $soap_output = $self->finish_output ($out_package);
 	    $LOG->debug ("Output raw data (first 1000 characters): " .
-			 substr ($soap_output->{_value}->[0], 0, 1000));
+			 substr ($soap_output->{_value}->[0], 0, 1000)) if ref($soap_output) =~ m|^HASH|;
+	   $LOG->debug ("Output raw data (first 1000 characters): " .
+             substr ($soap_output, 0, 1000)) unless ref($soap_output) =~ m|^HASH|;
 	    Log::Log4perl::NDC->pop();
 	    return $soap_output;
 	} else {

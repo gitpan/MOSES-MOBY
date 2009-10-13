@@ -3,7 +3,7 @@
 # Author: Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Config.pm,v 1.4 2008/04/29 19:45:01 kawas Exp $
+# $Id: Config.pm,v 1.6 2009/10/13 16:42:20 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Config;
@@ -15,7 +15,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.6 $ =~ /: (\d+)\.(\d+)/;
 
 my %Config = ();     # here are all configuration parameters
 my %Unsuccess = ();  # here are names (and reasons) of failed files
@@ -26,8 +26,62 @@ BEGIN {
     $ENV_CONFIG_DIR = 'BIOMOBY_CFG_DIR';
 }
 
+=head1 NAME
+
+MOSES::MOBY::Config - A hash based configuration module based on Config::Simple
+
+=head1 SYNOPSIS
+
+ # use config allong with the MOSES config file
+ use MOSES::MOBY::Config;
+
+ # use config along with my properties.file
+ use MOSES::MOBY::Config qw /'properties.file'/;
+
+ # print the successfully read config files
+ foreach my $file (MOSES::MOBY::Config->ok_files) {
+    print "\t$file - successfully processed\n";
+ }
+
+ # print a list of files that failed to load
+ my %failed = MOSES::MOBY::Config->failed_files;
+ if (keys %failed > 0) {
+    print "Failed configuration files:\n";
+    foreach my $file (sort keys %failed) {
+    my $msg = $failed{$file}; $msg =~ s/\n$//;
+        print "\t$file => $msg\n";
+    }
+ }
+
+ # print out the config params read thus far
+ print "All configuration parameters:\n";
+ foreach my $name (sort MOSES::MOBY::Config->param()) {
+    print "\t$name => " . MOSES::MOBY::Config->param ($name);
+ }
+
+=head1 DESCRIPTION
+
+A module for reading configuration files and maintaining configuration parameters 
+
+=head1 AUTHORS
+
+ Martin Senger (martin.senger [at] gmail [dot] com)
+ Edward Kawas (edward.kawas [at] gmail [dot] com)
+
+=head1 SUBROUTINES
+
+=cut
+
 # OO access; but there are no instance attributes - everything are
 # class (shared) attributes
+
+=head2 new
+
+Instantiates a new MOSES::MOBY::Config reference. Mainly here for OO access. 
+There are no instance attributes, only class attributes
+
+=cut
+
 
 sub new {
     my ($class, @args) = @_;
@@ -126,6 +180,13 @@ sub _resolve_file {
 
 # return value of a configuration argument; or add a new argument
 
+=head2 param
+
+If called with no arguments, all of the possible config keys are returned. 
+If called with a single argument, then that argument is assumed to be a key and the value for that key is returned. 
+
+=cut
+
 sub param {
     shift;
 
@@ -146,6 +207,12 @@ sub param {
 
 # remove one, more, or all configuration arguments
 
+=head2 delete
+
+removes one or more of the configuration keys and their associated values.
+
+=cut
+
 sub delete {
     shift;
 
@@ -163,6 +230,15 @@ sub delete {
 # stringified (I do not know how to express it better: simply speaking
 # this argument is passed to the Data::Dumper->Dump as the variable
 # name)
+
+=head2 dump
+
+Returns a stringified version of all configuration parameters;
+
+If passed a scalar parameter, then the dump will be given that variable name.
+This dump can be eval{}'ed.
+
+=cut
 
 sub dump {
     shift;
@@ -189,6 +265,12 @@ sub import_names {
 
 # return a list of configuration files successfully read (so far)
 
+=head2 ok_files
+
+returns a list of the configuration files successfully read thus far ...
+
+=cut
+
 sub ok_files {
     return sort keys %Success;
 }
@@ -196,11 +278,15 @@ sub ok_files {
 # return a hash of configuration files un-successfully read (so far) -
 # with corresponding error messages
 
+=head2 failed_files
+
+returns a hash of the configuration files unsuccessfully read thus far and their corresponding error messages.
+
+=cut
+
 sub failed_files {
     return %Unsuccess;
 }
-
-
 
 1;
 __END__

@@ -7,7 +7,7 @@ use warnings;
 
 use vars qw{$VERSION @ISA @EXPORT @EXPORT_OK};
 BEGIN {
-	$VERSION = sprintf "%d.%02d", q$Revision: 1.10 $ =~ /: (\d+)\.(\d+)/;
+	$VERSION = sprintf "%d.%02d", q$Revision: 1.11 $ =~ /: (\d+)\.(\d+)/;
 	@ISA       = qw{ Exporter };
 	@EXPORT    = qw{};
 	@EXPORT_OK = qw{};
@@ -22,7 +22,7 @@ __END__
 
 =head1 NAME
 
-MOSES::MOBY - Perl extension for the automatic generation of BioMOBY web services
+MOSES::MOBY - Start here! Documentation for the Perl extension for the automatic generation of BioMOBY web services!
 
 =head1 SYNOPSIS
 

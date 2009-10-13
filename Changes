@@ -1,5 +1,35 @@
 Revision history for Perl extension MOSES::MOBY.
 
+0.92 Oct 13, 2009
+    *** Notes for this release ***
+        The service template has been updated.
+        The update mainly affects async service
+        implementations. The easiest thing to do
+        is to backup your async service 
+        implementations and re-generate them.
+        
+        Only do this if you had problems with 
+        erratic service behaviour in the past!
+    
+    Changes:
+    - Bug fix: Can't use string ("<moby:MOBY
+      xmlns:moby="http://ww") as a HASH ref while 
+      "strict refs" in use ... when testing CGI 
+      services.
+    - Bug fix: when namespace checking in our
+      service implementation, if no namespace
+      is passed, our code produces warnings ...
+      added check to ensure that namespace is
+      defined before checking. 
+    - when testing async services, added a line
+      to print out the LSAE event message if it
+      exists and if the script is running under
+      verbose settings.
+    - Bug fix: Central->_createServiceFromXML had
+      Category as category
+    - added some code to the service.tt that aides
+      in updating a services LSAE event states.
+      
 0.91
 	- Updated the Makefile.PL to handle some missing 
 	  dependencies.

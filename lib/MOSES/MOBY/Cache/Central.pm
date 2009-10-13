@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Central.pm,v 1.8 2009/08/27 19:40:50 kawas Exp $
+# $Id: Central.pm,v 1.9 2009/10/09 17:29:28 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Cache::Central;
@@ -31,7 +31,7 @@ use constant NAMESPACES_CACHE   => 'namespaces';
 use constant SERVICETYPES_CACHE => 'serviceTypes';
 
 # the version of this file:
-$VERSION = sprintf "%d.%02d", q$Revision: 1.8 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.9 $ =~ /: (\d+)\.(\d+)/;
 
 =head1 NAME
 
@@ -991,7 +991,7 @@ sub _createServiceFromXML {
     $service->lsid($service_node->getAttribute('lsid') || '');
     $service->type($service_node->getChildrenByTagName('serviceType')->get_node(1)->textContent) if $service_node->getChildrenByTagName('serviceType')->size() > 0;
     $service->authoritative($service_node->getChildrenByTagName('authoritative')->get_node(1)->textContent) if $service_node->getChildrenByTagName('authoritative')->size() > 0;
-    $service->category($service_node->getChildrenByTagName('category')->get_node(1)->textContent) if $service_node->getChildrenByTagName('category')->size() > 0;
+    $service->category($service_node->getChildrenByTagName('Category')->get_node(1)->textContent) if $service_node->getChildrenByTagName('Category')->size() > 0;
     $service->description($service_node->getChildrenByTagName('Description')->get_node(1)->textContent) if $service_node->getChildrenByTagName('Description')->size() > 0;
     $service->email($service_node->getChildrenByTagName('contactEmail')->get_node(1)->textContent) if $service_node->getChildrenByTagName('contactEmail')->size() > 0;
     $service->signatureURL($service_node->getChildrenByTagName('signatureURL')->get_node(1)->textContent) if $service_node->getChildrenByTagName('signatureURL')->size() > 0;
