@@ -1,9 +1,9 @@
 Perl documentation:
 ===================
 
-pod2man MOBY/Datatypes/MobyObject.pm | nroff -man | less
+pod2man lib/MOSES/MOBY/Data/Object.pm | nroff -man | less
 ---
-pods2html --index='Perl MoSeS Documentation' /home/senger/jMoby/src/Perl/ /home/senger/jMoby/src/perldoc/
+pods2html --index='Perl MoSeS Documentation' ~/moby-live/Perl/MOSES-MOBY/lib ~/moby-live/Perl/MOSES-MOBY/perldoc/
 ---
 http://search.cpan.org/~iwalz/Pod2html/lib/Pod/2/html.pm
 ----

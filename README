@@ -1,4 +1,4 @@
-MOSES-MOBY version .85
+MOSES-MOBY version .92
 ======================
 
 OVERVIEW
@@ -16,12 +16,22 @@ of providing the business logic for their service.
 
 INSTALLATION
 
-To install this module type the following:
+	To install this module type the following:
+	
+	   perl Makefile.PL
+	   make
+	   make test
+	   make install
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+	To install this module on WinOS:
+	
+		perl Makefile.PL
+		nmake
+		nmake test
+		nmake install
+	
+	If you have any problems installing prerequisite modules,
+	you may find it easier to use ActiveStates ppm utility.
 
 UPGRADING
 

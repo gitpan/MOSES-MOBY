@@ -1,5 +1,37 @@
 Revision history for Perl extension MOSES::MOBY.
 
+0.94
+    Fix to moses-testing-service.pl script. typo
+    found in script.
+    
+0.93
+
+    Changes:
+    - Bug fix: moses-testing-service.pl when 
+      polling async services, didn't actually
+      poll correctly if you had multiple query
+      IDs for a single service invocation ID.
+      The first queryID was polled and when
+      it completed, the script assumed all of
+      the invocations were completed.
+    - moses-testing-service.pl (thx to Pieter Neerincx)
+        * Moved the POST request out of the foreach
+          $queryID loop.
+        * Added the name of the element "analysis_event"
+          to $xpath.
+        * Moved the sleep(20) out of the &_check_status
+          sub. 
+        * Added a diagnostic message for the die
+          statement when we cant find our event id.
+        * Moved some messages for "verbose" info in
+          &_check_status, so the script always reports
+          the job status whether a job has completed
+          or not.
+        * I also added $queryID to the verbose messaging
+          so the script reports which job that status
+          message corresponded to...
+    
+
 0.92 Oct 13, 2009
     *** Notes for this release ***
         The service template has been updated.
