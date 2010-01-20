@@ -44,4 +44,4 @@ requires:
   XML::LibXML::Common: 0.13
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.94
+version: 0.95

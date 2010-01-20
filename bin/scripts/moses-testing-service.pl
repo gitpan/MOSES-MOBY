@@ -5,7 +5,6 @@
 # $Id: moses-testing-service.pl,v 1.15 2009/10/23 18:02:14 kawas Exp $
 # Contact: Martin Senger <martin.senger@gmail.com>
 # -----------------------------------------------------------
-
 BEGIN {
 
 	# some command-line options
@@ -153,7 +152,8 @@ sub _check_status {
 			$completed->{$queryID} = 1;
 		} elsif ( $status->percentage < 100 ) {
 			print "\tmsg: ",
-			  ( $status->message ? $status->message : "no message found ..." ), "\n"
+			  ( $status->message ? $status->message : "no message found ..." ),
+			  "\n"
 			  if $opt_v;
 
 			#sleep(20);
@@ -172,7 +172,8 @@ sub _check_status {
 				  || ( $status->new_state =~ m"running"i ) )
 		{
 			print "\tmsg: ",
-			  ( $status->message ? $status->message : "no message found ..." ), "\n"
+			  ( $status->message ? $status->message : "no message found ..." ),
+			  "\n"
 			  if $opt_v;
 
 			#sleep(20);
@@ -180,13 +181,15 @@ sub _check_status {
 			die "ERROR:  analysis event block not well formed.\n";
 		}
 	} elsif ( $status->type == LSAE_STEP_PROGRESS_EVENT ) {
-		print "Steps completed for job $queryID: ", $status - > steps_completed, "\n"
+		print "Steps completed for job $queryID: ", $status->steps_completed,
+		  "\n"
 		  if $opt_v;
 		if ( $status->steps_completed >= $status->total_steps ) {
 			$completed->{$queryID} = 1;
 		} elsif ( $status->steps_completed < $status->total_steps ) {
 			print "\tmsg: ",
-			  ( $status->message ? $status->message : "no message found ..." ), "\n"
+			  ( $status->message ? $status->message : "no message found ..." ),
+			  "\n"
 			  if $opt_v;
 
 			#sleep(20);
@@ -200,7 +203,8 @@ sub _check_status {
 			$completed->{$queryID} = 1;
 		} elsif ( $status->remaining > 0 ) {
 			print "\tmsg: ",
-			  ( $status->message ? $status->message : "no message found ..." ), "\n"
+			  ( $status->message ? $status->message : "no message found ..." ),
+			  "\n"
 			  if $opt_v;
 
 			#sleep(20);
@@ -223,15 +227,17 @@ sub _get_query_ids {
 		my $node = $iterator->get_node($_);
 		my $id   = $node->getAttribute("queryID")
 		  || $node->getAttribute(
-						 $node->lookupNamespacePrefix($WSRF::Constants::MOBY_MESSAGE_NS)
-						   . ":queryID" );
+				 $node->lookupNamespacePrefix($WSRF::Constants::MOBY_MESSAGE_NS)
+				   . ":queryID" );
 		push @query_ids, $id;
 	}
 	return @query_ids;
 }
 
 # --- what service to call
-my $module = shift unless $opt_c or $opt_C;    # eg. Service::Mabuhay, or just Mabuhay
+my $module = shift
+  unless $opt_c
+	  or $opt_C;    # eg. Service::Mabuhay, or just Mabuhay
 my $service;
 ( $service = $module ) =~ s/.*::// unless $opt_c or $opt_C;
 
@@ -245,8 +251,12 @@ if ($opt_e) {
 			my $res  = shift;
 			my $msg =
 			  ref $res
-			  ? "--- SOAP FAULT ---\n" . $res->faultcode . " " . $res->faultstring
-			  : "--- TRANSPORT ERROR ---\n" . $soap->transport->status . "\n$res\n";
+			  ? "--- SOAP FAULT ---\n"
+			  . $res->faultcode . " "
+			  . $res->faultstring
+			  : "--- TRANSPORT ERROR ---\n"
+			  . $soap->transport->status
+			  . "\n$res\n";
 			die $msg;
 		}
 	);
@@ -312,7 +322,8 @@ if ($opt_e) {
 	my $parser = XML::LibXML->new();
 	my $doc    = $parser->parse_string($epr);
 	my $ID =
-	  $doc->getElementsByLocalName("ServiceInvocationId")->get_node(1)->textContent;
+	  $doc->getElementsByLocalName("ServiceInvocationId")->get_node(1)
+	  ->textContent;
 	$ID =~ s/ //gi;
 	my $searchTerm = "";
 	$searchTerm .=
@@ -348,13 +359,13 @@ if ($opt_e) {
 			# skip poll if current job completed
 			next if $completed{$queryID};
 
-			#
-			# Find status of this query ID.
-			#
-			#my $xpath = "//*[local-name() = 'analysis_event'][\@id='$queryID']";
-			#my $xpath = "//analysis_event[\@id='$queryID']";
-			my $xpath = "//*[local-name() = 'analysis_event'][\@*='$queryId']";
-			my $xpc = XML::LibXML::XPathContext->new();
+		   #
+		   # Find status of this query ID.
+		   #
+		   #my $xpath = "//*[local-name() = 'analysis_event'][\@id='$queryID']";
+		   #my $xpath = "//analysis_event[\@id='$queryID']";
+			my $xpath = "//*[local-name() = 'analysis_event'][\@*='$queryID']";
+			my $xpc   = XML::LibXML::XPathContext->new();
 			my $nodes = $xpc->findnodes( $xpath, $doc->documentElement );
 
 			# should only be one ...
@@ -364,233 +375,246 @@ if ($opt_e) {
 			my $status =
 			  LSAE::AnalysisEventBlock->new( $nodes->get_node(1)->toString() );
 			&_check_status( $status, \%completed, $queryID, $opt_v );
-		}
+		}    #end foreach
 		last if scalar keys(%completed) == $#query_ids + 1;
 		my $interval = 20;
 		print "Checking job state again in $interval seconds.\n\n" if $opt_v;
 		sleep($interval);
-	}
-	last if scalar keys(%completed) == $#query_ids + 1;
-}
+	} #end while(1)
+	#last if scalar keys(%completed) == $#query_ids + 1;
 
-# task is finished, obtain the result
-$searchTerm = "";
-$searchTerm .=
-"<wsrf-rp:GetMultipleResourceProperties xmlns:wsrf-rp='$WSRF::Constants::WSRP' xmlns:mobyws='$WSRF::Constants::MOBY'>";
-foreach my $queryID (@query_ids) {
+	# task is finished, obtain the result
+	$searchTerm = "";
 	$searchTerm .=
-	    "<wsrf-rp:ResourceProperty>mobyws:result_" 
-	  . $queryID
-	  . "</wsrf-rp:ResourceProperty>";
-}
-$searchTerm .= "</wsrf-rp:GetMultipleResourceProperties>";
-$header = _moby_wsrf_header( $opt_C, $ID );
-$header =~ s/\n//gi;
-$req = HTTP::Request->new( POST => $opt_C . "/results" );
-$req->header( "moby-wsrf" => $header );
-$req->content_type('application/x-www-form-urlencoded');
-$req->content("data=$searchTerm");
-$response = $ua->request($req);
+"<wsrf-rp:GetMultipleResourceProperties xmlns:wsrf-rp='$WSRF::Constants::WSRP' xmlns:mobyws='$WSRF::Constants::MOBY'>";
+	foreach my $queryID (@query_ids) {
+		$searchTerm .=
+		    "<wsrf-rp:ResourceProperty>mobyws:result_" 
+		  . $queryID
+		  . "</wsrf-rp:ResourceProperty>";
+	}
+	$searchTerm .= "</wsrf-rp:GetMultipleResourceProperties>";
+	$header = _moby_wsrf_header( $opt_C, $ID );
+	$header =~ s/\n//gi;
+	$req = HTTP::Request->new( POST => $opt_C . "/results" );
+	$req->header( "moby-wsrf" => $header );
+	$req->content_type('application/x-www-form-urlencoded');
+	$req->content("data=$searchTerm");
+	$response = $ua->request($req);
 
-# create nicely formatted XML
-$parser = XML::LibXML->new();
-$doc    = $parser->parse_string( $response->content );
-print "\n" . $doc->toString(1);
+	# create nicely formatted XML
+	$parser = XML::LibXML->new();
+	$doc    = $parser->parse_string( $response->content );
+	print "\n" . $doc->toString(1);
 
-# destroy the job
-$searchTerm = '<Destroy xmlns="http://docs.oasis-open.org/wsrf/rl-2"/> ';
-$req = HTTP::Request->new( POST => $opt_C . "/destroy" );
-$req->header( "moby-wsrf" => $header );
-$req->content_type('application/x-www-form-urlencoded');
-$req->content("data=$searchTerm");
-$response = $ua->request($req);
-print "Destroying the resource returned:\n\t" . $response->content . "\n" if $opt_v;
-}
-elsif ($opt_a) {
+	# destroy the job
+	$searchTerm = '<Destroy xmlns="http://docs.oasis-open.org/wsrf/rl-2"/> ';
+	$req = HTTP::Request->new( POST => $opt_C . "/destroy" );
+	$req->header( "moby-wsrf" => $header );
+	$req->content_type('application/x-www-form-urlencoded');
+	$req->content("data=$searchTerm");
+	$response = $ua->request($req);
+	print "Destroying the resource returned:\n\t" . $response->content . "\n"
+	  if $opt_v;
+} elsif ($opt_a) {
 
-  # calling a real service, using async soap
-  # call using async mode for async service ... _submit
-  $service .= "_submit";
+	# calling a real service, using async soap
+	# call using async mode for async service ... _submit
+	$service .= "_submit";
 
-  # set up the wsrf call
-  my $soap = WSRF::Lite->proxy($opt_a)->uri($WSRF::Constants::MOBY)->on_fault(
-	  sub {
-		  my $soap = shift;
-		  my $res  = shift;
-		  my $msg =
-			ref $res
-			? "--- SOAP FAULT ---\n" . $res->faultcode . " " . $res->faultstring
-			: "--- TRANSPORT ERROR ---\n" . $soap->transport->status . "\n$res\n";
-		  die $msg;
-	  }
-  );
+	# set up the wsrf call
+	my $soap = WSRF::Lite->proxy($opt_a)->uri($WSRF::Constants::MOBY)->on_fault(
+		sub {
+			my $soap = shift;
+			my $res  = shift;
+			my $msg =
+			  ref $res
+			  ? "--- SOAP FAULT ---\n"
+			  . $res->faultcode . " "
+			  . $res->faultstring
+			  : "--- TRANSPORT ERROR ---\n"
+			  . $soap->transport->status
+			  . "\n$res\n";
+			die $msg;
+		}
+	);
 
-  # get the input
-  my $input = '';
-  if ( @ARGV > 0 ) {
-	  my $data = shift;    # a file name
-	  open INPUT, "<$data"
-		or die "Cannot read '$data': $!\n";
-	  while (<INPUT>) { $input .= $_; }
-	  close INPUT;
-  } else {
-	  $input = _empty_input;
-  }
+	# get the input
+	my $input = '';
+	if ( @ARGV > 0 ) {
+		my $data = shift;    # a file name
+		open INPUT, "<$data"
+		  or die "Cannot read '$data': $!\n";
+		while (<INPUT>) { $input .= $_; }
+		close INPUT;
+	} else {
+		$input = _empty_input;
+	}
 
-  # extract all of the query ids from $input
-  my @query_ids = _get_query_ids($input);
-  print "\nSending the following data to $service asynchronously:\n", $input, "\n"
-	if $opt_v;
+	# extract all of the query ids from $input
+	my @query_ids = _get_query_ids($input);
+	print "\nSending the following data to $service asynchronously:\n", $input,
+	  "\n"
+	  if $opt_v;
 
-  # submit the job
-  my $epr = ( $soap->$service( SOAP::Data->type( 'string' => "$input" ) )->result );
+	# submit the job
+	my $epr =
+	  ( $soap->$service( SOAP::Data->type( 'string' => "$input" ) )->result );
 
-  # Get address from the returned Endpoint Reference
-  my $address = $epr->{'EndpointReference'}->{Address};
+	# Get address from the returned Endpoint Reference
+	my $address = $epr->{'EndpointReference'}->{Address};
 
-  # Get resource identifier from the returned Endpoint Reference
-  my $identifier =
-	$epr->{'EndpointReference'}->{ReferenceParameters}->{ServiceInvocationId};
+	# Get resource identifier from the returned Endpoint Reference
+	my $identifier =
+	  $epr->{'EndpointReference'}->{ReferenceParameters}->{ServiceInvocationId};
 
-  # Compose the Endpoint Reference
-  my $EPR = WSRF::WS_Address->new();
-  $EPR->Address($address);
-  $EPR->ReferenceParameters(   '<mobyws:ServiceInvocationId xmlns:mobyws="'
-							 . $WSRF::Constants::MOBY . '">'
-							 . $identifier
-							 . '</mobyws:ServiceInvocationId>' );
-  my %completed = ();
-  while (1) {
-	  foreach my $queryID (@query_ids) {
+	# Compose the Endpoint Reference
+	my $EPR = WSRF::WS_Address->new();
+	$EPR->Address($address);
+	$EPR->ReferenceParameters(   '<mobyws:ServiceInvocationId xmlns:mobyws="'
+							   . $WSRF::Constants::MOBY . '">'
+							   . $identifier
+							   . '</mobyws:ServiceInvocationId>' );
+	my %completed = ();
+	while (1) {
+		foreach my $queryID (@query_ids) {
 
-		  # skip poll if current job completed
-		  next if $completed{$queryID};
+			# skip poll if current job completed
+			next if $completed{$queryID};
 
-		  # poll the service for given query ID
-		  my $searchTerm = "";
-		  $searchTerm .=
+			# poll the service for given query ID
+			my $searchTerm = "";
+			$searchTerm .=
 "<wsrp:ResourceProperty xmlns:wsrp='$WSRF::Constants::WSRP' xmlns:mobyws='$WSRF::Constants::MOBY'>";
-		  $searchTerm .= "mobyws:status_" . $queryID;
-		  $searchTerm .= "</wsrp:ResourceProperty>";
-		  $soap = WSRF::Lite->uri($WSRF::Constants::WSRP)->on_action(
-			  sub {
-				  sprintf '%s/%s/%sRequest', $WSRF::Constants::WSRPW, $_[1], $_[1];
-			  }
-			)->wsaddress($EPR)
-			->GetMultipleResourceProperties(
-										  SOAP::Data->value($searchTerm)->type('xml') );
-		  my $parser = XML::LibXML->new();
-		  my $xml    = $soap->raw_xml;
-		  my $doc    = $parser->parse_string($xml);
-		  $soap = $doc->getDocumentElement();
-		  my $prop_name = "status_" . $queryID;
-		  my ($prop) =
-			   $soap->getElementsByTagNameNS( $WSRF::Constants::MOBY, $prop_name )
-			|| $soap->getElementsByTagName($prop_name);
-		  my $event = $prop->getFirstChild->toString
-			unless ref $prop eq "XML::LibXML::NodeList";
-		  $event = $prop->pop()->getFirstChild->toString
-			if ref $prop eq "XML::LibXML::NodeList";
-		  my $status = LSAE::AnalysisEventBlock->new($event);
+			$searchTerm .= "mobyws:status_" . $queryID;
+			$searchTerm .= "</wsrp:ResourceProperty>";
+			$soap = WSRF::Lite->uri($WSRF::Constants::WSRP)->on_action(
+				sub {
+					sprintf '%s/%s/%sRequest', $WSRF::Constants::WSRPW, $_[1],
+					  $_[1];
+				}
+			  )->wsaddress($EPR)
+			  ->GetMultipleResourceProperties(
+								  SOAP::Data->value($searchTerm)->type('xml') );
+			my $parser = XML::LibXML->new();
+			my $xml    = $soap->raw_xml;
+			my $doc    = $parser->parse_string($xml);
+			$soap = $doc->getDocumentElement();
+			my $prop_name = "status_" . $queryID;
+			my ($prop) =
+			  $soap->getElementsByTagNameNS( $WSRF::Constants::MOBY,
+											 $prop_name )
+			  || $soap->getElementsByTagName($prop_name);
+			my $event = $prop->getFirstChild->toString
+			  unless ref $prop eq "XML::LibXML::NodeList";
+			$event = $prop->pop()->getFirstChild->toString
+			  if ref $prop eq "XML::LibXML::NodeList";
+			my $status = LSAE::AnalysisEventBlock->new($event);
 
-		  if ( $status->type == LSAE_PERCENT_PROGRESS_EVENT ) {
-			  if ( $status->percentage >= 100 ) {
-				  $completed{$queryID} = 1;
-			  } elsif ( $status->percentage < 100 ) {
-				  print "Current percentage: ", $status->percentage, "\n" if $opt_v;
-				  sleep(20);
-			  } else {
-				  die "ERROR:  analysis event block not well formed.\n";
-			  }
-		  } elsif ( $status->type == LSAE_STATE_CHANGED_EVENT ) {
-			  if (    ( $status->new_state =~ m"completed"i )
-				   || ( $status->new_state =~ m"terminated_by_request"i )
-				   || ( $status->new_state =~ m"terminated_by_error"i ) )
-			  {
-				  $completed{$queryID} = 1;
-			  } elsif (    ( $status->new_state =~ m"created"i )
-						|| ( $status->new_state =~ m"running"i ) )
-			  {
-				  print "Current State: ", $status->new_state, "\n" if $opt_v;
-				  sleep(20);
-			  } else {
-				  die "ERROR:  analysis event block not well formed.\n";
-			  }
-		  } elsif ( $status->type == LSAE_STEP_PROGRESS_EVENT ) {
-			  if ( $status->steps_completed >= $status->total_steps ) {
-				  $completed{$queryID} = 1;
-			  } elsif ( $status->steps_completed < $status->total_steps ) {
-				  print "Steps completed: ", $status->steps_completed, "\n" if $opt_v;
-				  sleep(20);
-			  } else {
-				  die "ERROR:  analysis event block not well formed.\n";
-			  }
-		  } elsif ( $status->type == LSAE_TIME_PROGRESS_EVENT ) {
-			  if ( $status->remaining == 0 ) {
-				  $completed{$queryID} = 1;
-			  } elsif ( $status->remaining > 0 ) {
-				  print "Time remaining: ", $status->remaining, "\n" if $opt_v;
-				  sleep(20);
-			  } else {
-				  die "ERROR:  analysis event block not well formed.\n";
-			  }
-		  }
-	  }
-	  last if scalar keys(%completed) == $#query_ids + 1;
-  }
-  foreach my $queryID (@query_ids) {
+			if ( $status->type == LSAE_PERCENT_PROGRESS_EVENT ) {
+				if ( $status->percentage >= 100 ) {
+					$completed{$queryID} = 1;
+				} elsif ( $status->percentage < 100 ) {
+					print "Current percentage: ", $status->percentage, "\n"
+					  if $opt_v;
+					sleep(20);
+				} else {
+					die "ERROR:  analysis event block not well formed.\n";
+				}
+			} elsif ( $status->type == LSAE_STATE_CHANGED_EVENT ) {
+				if (    ( $status->new_state =~ m"completed"i )
+					 || ( $status->new_state =~ m"terminated_by_request"i )
+					 || ( $status->new_state =~ m"terminated_by_error"i ) )
+				{
+					$completed{$queryID} = 1;
+				} elsif (    ( $status->new_state =~ m"created"i )
+						  || ( $status->new_state =~ m"running"i ) )
+				{
+					print "Current State: ", $status->new_state, "\n" if $opt_v;
+					sleep(20);
+				} else {
+					die "ERROR:  analysis event block not well formed.\n";
+				}
+			} elsif ( $status->type == LSAE_STEP_PROGRESS_EVENT ) {
+				if ( $status->steps_completed >= $status->total_steps ) {
+					$completed{$queryID} = 1;
+				} elsif ( $status->steps_completed < $status->total_steps ) {
+					print "Steps completed: ", $status->steps_completed, "\n"
+					  if $opt_v;
+					sleep(20);
+				} else {
+					die "ERROR:  analysis event block not well formed.\n";
+				}
+			} elsif ( $status->type == LSAE_TIME_PROGRESS_EVENT ) {
+				if ( $status->remaining == 0 ) {
+					$completed{$queryID} = 1;
+				} elsif ( $status->remaining > 0 ) {
+					print "Time remaining: ", $status->remaining, "\n"
+					  if $opt_v;
+					sleep(20);
+				} else {
+					die "ERROR:  analysis event block not well formed.\n";
+				}
+			}
+		}
+		last if scalar keys(%completed) == $#query_ids + 1;
+	}
+	foreach my $queryID (@query_ids) {
 
-	  # get the result
-	  my $searchTerm .=
+		# get the result
+		my $searchTerm .=
 "<wsrp:ResourceProperty xmlns:wsrp='$WSRF::Constants::WSRP' xmlns:mobyws='$WSRF::Constants::MOBY'>";
-	  $searchTerm .= "mobyws:result_" . $queryID;
-	  $searchTerm .= "</wsrp:ResourceProperty>";
-	  my $ans = WSRF::Lite->uri($WSRF::Constants::WSRP)->on_action(
-		  sub {
-			  sprintf '%s/%s/%sRequest', $WSRF::Constants::WSRPW, $_[1], $_[1];
-		  }
-		)->wsaddress($EPR)
-		->GetMultipleResourceProperties( SOAP::Data->value($searchTerm)->type('xml') );
-	  die "ERROR:  " . $ans->faultstring if ( $ans->fault );
-	  my $parser = XML::LibXML->new();
-	  my $xml    = $ans->raw_xml;
-	  my $doc    = $parser->parse_string($xml);
-	  $soap = $doc->getDocumentElement();
-	  my $prop_name = "result_" . $queryID;
-	  my ($prop) = $soap->getElementsByTagNameNS( $WSRF::Constants::MOBY, $prop_name )
-		|| $soap->getElementsByTagName($prop_name);
-	  my $result = $prop->getFirstChild->toString
-		unless ref $prop eq "XML::LibXML::NodeList";
-	  $result = $prop->pop()->getFirstChild->toString
-		if ref $prop eq "XML::LibXML::NodeList";
-	  print $result;
-  }
+		$searchTerm .= "mobyws:result_" . $queryID;
+		$searchTerm .= "</wsrp:ResourceProperty>";
+		my $ans = WSRF::Lite->uri($WSRF::Constants::WSRP)->on_action(
+			sub {
+				sprintf '%s/%s/%sRequest', $WSRF::Constants::WSRPW, $_[1],
+				  $_[1];
+			}
+		  )->wsaddress($EPR)
+		  ->GetMultipleResourceProperties(
+								  SOAP::Data->value($searchTerm)->type('xml') );
+		die "ERROR:  " . $ans->faultstring if ( $ans->fault );
+		my $parser = XML::LibXML->new();
+		my $xml    = $ans->raw_xml;
+		my $doc    = $parser->parse_string($xml);
+		$soap = $doc->getDocumentElement();
+		my $prop_name = "result_" . $queryID;
+		my ($prop) =
+		     $soap->getElementsByTagNameNS( $WSRF::Constants::MOBY, $prop_name )
+		  || $soap->getElementsByTagName($prop_name);
+		my $result = $prop->getFirstChild->toString
+		  unless ref $prop eq "XML::LibXML::NodeList";
+		$result = $prop->pop()->getFirstChild->toString
+		  if ref $prop eq "XML::LibXML::NodeList";
+		print $result;
+	}
 
-  # destroy the result
-  my $ans = WSRF::Lite->uri($WSRF::Constants::WSRL)->on_action(
-	  sub {
-		  sprintf '%s/ImmediateResourceTermination/%sRequest',
-			$WSRF::Constants::WSRLW, $_[1];
-	  }
-  )->wsaddress($EPR)->Destroy();
+	# destroy the result
+	my $ans = WSRF::Lite->uri($WSRF::Constants::WSRL)->on_action(
+		sub {
+			sprintf '%s/ImmediateResourceTermination/%sRequest',
+			  $WSRF::Constants::WSRLW, $_[1];
+		}
+	)->wsaddress($EPR)->Destroy();
 } else {
 
-  # calling a local service module, without SOAP
-  my $data;
-  if ( @ARGV > 0 ) {
-	  $data = shift;    # a file name
-  } else {
-	  use File::Temp qw( tempfile );
-	  my $fh;
-	  ( $fh, $data ) = tempfile( UNLINK => 1 );
-	  print $fh _empty_input();
-	  close $fh;
-  }
-  eval "require $module" or croak $@;
-  eval {
-	  my $target = new $module;
-	  print $target->$service($data), "\n";
-  } or croak $@;
+	# calling a local service module, without SOAP
+	my $data;
+	if ( @ARGV > 0 ) {
+		$data = shift;    # a file name
+	} else {
+		use File::Temp qw( tempfile );
+		my $fh;
+		( $fh, $data ) = tempfile( UNLINK => 1 );
+		print $fh _empty_input();
+		close $fh;
+	}
+	eval "require $module" or croak $@;
+	eval {
+		my $target = new $module;
+		print $target->$service($data), "\n";
+	} or croak $@;
 }
 
 sub _moby_wsrf_header {

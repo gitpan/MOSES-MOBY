@@ -1,5 +1,10 @@
 Revision history for Perl extension MOSES::MOBY.
 
+
+0.95
+    Fix to moses-testing-service.pl script. typos
+    found in script(thanks Hong-Jie Dai).
+
 0.94
     Fix to moses-testing-service.pl script. typo
     found in script.
