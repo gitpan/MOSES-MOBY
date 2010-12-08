@@ -4,7 +4,7 @@
 #         Martin Senger <martin.senger@gmail.com>
 # For copyright and disclaimer see below.
 #
-# $Id: Object.pm,v 1.4 2008/04/29 19:35:57 kawas Exp $
+# $Id: Object.pm,v 1.5 2010/12/08 16:14:13 kawas Exp $
 #-----------------------------------------------------------------
 
 package MOSES::MOBY::Data::Object;
@@ -14,7 +14,7 @@ use strict;
 
 # add versioning to this module
 use vars qw /$VERSION/;
-$VERSION = sprintf "%d.%02d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
 
 #-----------------------------------------------------------------
 # load all modules needed for my attributes
@@ -239,7 +239,7 @@ sub _add_XML_element {
 	 provision => 1,
 	 );
     if ($name eq 'value' and $self->primitive) {
-	if ($value) {
+	if (defined $value) {
 	    if ($self->{cdata}) {  # don't use: $self->cdata because not everybody has it
 		$root->appendChild (XML::LibXML::CDATASection->new ($self->_express_value ($value)));
 	    } else {

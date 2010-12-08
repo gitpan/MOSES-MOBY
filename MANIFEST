@@ -19,7 +19,6 @@ inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
-inc/Module/Install/Scripts.pm
 inc/Module/Install/Share.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
@@ -58,19 +57,19 @@ lib/MOSES/MOBY/Service/ServiceBase.pm
 lib/MOSES/MOBY/ServiceException.pm
 lib/MOSES/MOBY/Tags.pm
 Makefile.PL
-MANIFEST			This list of files
+MANIFEST                        This list of files
 META.yml
 README
-share/AsyncMobyServer.cgi.template
 share/log4perl.properties.template
 share/mabuhay.file
 share/moby-services.cfg.template
+share/AsyncMobyServer.cgi.template
 share/MobyServer.cgi.template
 share/notes
-share/samples/ASYNC_SERVICE_TABLE
 share/samples/Service/HelloBiomobyWorld.pm
 share/samples/Service/Mabuhay.pm
 share/samples/SERVICES_TABLE
+share/samples/ASYNC_SERVICE_TABLE
 share/USER_REGISTRIES
 t/MOSES-MOBY-Cache.t
 t/MOSES-MOBY-Registry.t
